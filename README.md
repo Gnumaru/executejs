@@ -4,16 +4,7 @@ executejs
 Execute/run javascript files from within other javascript files from the
 browser easily!!!
 
-The purpose of this library is to implement a minimalistic, execution time,
-code inclusion functionality in javascript (like it is done in compile time
-in C with "include", in Java with "import", in C# with "using" and in
-execution time in php with require and require_once), to prevent using
-several script tags into a html file. This is NOT suposed to be an
-asynchronous module loader like requirejs, or a synchronous module dependency
-resolver and build tool like browserify, it is intended to do at runtime
-exactly what a php interpreter would do when encountering the require and
-require_once function calls, or what a C compiler preprocessor would do with
-a include statement
+The purpose of this library is to implement a minimalistic, execution time, code inclusion functionality in javascript (like it is done in compile time in C with "include", in Java with "import", in C# with "using" and in execution time in php with require and require_once), to prevent using several script tags into a html file. This is NOT suposed to be an asynchronous module loader like requirejs, or a synchronous module dependency resolver and build tool like browserify, it is intended to do at runtime exactly what a php interpreter would do when encountering the require and require_once function calls, or what a C compiler preprocessor would do with a include statement
 
 There is not yet a greatly accepted standard for javascript code modularity
 handling (I'm not talking about code modules definitions and usage, that is
@@ -41,3 +32,28 @@ require("myAwesomeProcedure.js"); inside your scheduler and that's all
 execute.js does not address the scopping problem (handling conflicts due to
 using global variables) AT ALL because that is something you already would be
 addressing by yourself when using several script tags
+
+From within your index file, include just one script tag for executejs and
+another one for your main js file (you wont need more than your main file
+anymore =)
+
+Usage
+=========
+From within your index file, include just one script tag for executejs and another one for your main js file (you wont need more than your main file anymore =)
+```html
+<head>
+  <script src="js/execute.js"></script>
+  <script src="js/main.js"></script>
+</head>
+```
+To execute a file from within another, just use
+
+```javascript
+execute("myFile.js")/
+```
+
+or without the filetype extension 
+```javascript
+execute("myFile")/
+```
+
