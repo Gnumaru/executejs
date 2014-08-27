@@ -8,7 +8,7 @@ The purpose of this library is to implement a minimalistic, execution time,
 code inclusion functionality in javascript (like it is done in compile time
 in C with "include", in Java with "import", in C# with "using" and in
 execution time in php with require and require_once), to prevent using
-several <script> tags into a html file. This is NOT suposed to be an
+several script tags into a html file. This is NOT suposed to be an
 asynchronous module loader like requirejs, or a synchronous module dependency
 resolver and build tool like browserify, it is intended to do at runtime
 exactly what a php interpreter would do when encountering the require and
@@ -23,7 +23,7 @@ bundled into a single file). Many use several build tools like browserify or
 other tools to parse dependencies and preprocess/concatenate files
 accordingly. Others use libraries like require.js to load different module
 files at runtime, and others separate their code into several script files
-and add several <include> tags in the page header.
+and add several include tags in the page header.
 
 execute.js intend to address this problem in a very simple and minimalistic
 way. It is intended to be a minimalistc tool to execute a given in-domain
@@ -40,4 +40,4 @@ require("myAwesomeProcedure.js"); inside your scheduler and that's all
 
 execute.js does not address the scopping (handling conflicts due to using
 global variables) problem AT ALL because that is something you already would
-be addressing by yourself when using several <script> tags
+be addressing by yourself when using several script tags
