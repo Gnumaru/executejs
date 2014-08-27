@@ -1,17 +1,18 @@
 executejs
 =========
 
-Execute other javascript files from the browser easily
+Execute javascript files from within other javascript files from the browser
+easily!!!
 
 
 The purpose of this library is to implement a minimalistic
-"include/import/using" functionality in javascript, to prevent using several
-script tags into a html file. This is NOT suposed to be an asynchronous
-module loader like requirejs, or a synchronous module dependency resolver and
-build tool like browserify, it is intended to do at runtime exactly what a
-php interpreter would do when encountering the require and require_once
-function calls, or what a C compiler preprocessor would do with a include
-statement
+"include/import/using/require" functionality in javascript, to prevent using
+several script tags into a html file. This is NOT suposed to be an
+asynchronous module loader like requirejs, or a synchronous module dependency
+resolver and build tool like browserify, it is intended to do at runtime
+exactly what a php interpreter would do when encountering the require and
+require_once function calls, or what a C compiler preprocessor would do with
+a include statement
 
 There is not yet a greatly accepted standard for javascript code modularity
 handling (I'm not talking about code modules definitions and usage, that is
