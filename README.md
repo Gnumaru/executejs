@@ -38,6 +38,6 @@ lifetime. Or say you have a procedure that is schedulled (by whathever means)
 to be executed continuously every minute. you could just put a
 require("myAwesomeProcedure.js"); inside your scheduler and that's all
 
-execute.js does not address the scopping (handling conflicts due to using
-global variables) problem AT ALL because that is something you already would
-be addressing by yourself when using several script tags
+execute.js does not address the scopping problem (handling conflicts due to
+using global variables) AT ALL because that is something you already would be
+addressing by yourself when using several script tags
