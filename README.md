@@ -40,6 +40,7 @@ or
 ```javascript
 executeOnce("myFile");
 ```
+execute() will always execute the file, whereas executeOnce() will execute it only if it was not already executed by executeOnce(). But a script executed by executeOnce() can be executed again by execute().
 
 executejs expects a folder structure where all code is inside a "js" folder (at the same level as index.html) and its subfolders.
 ```
