@@ -65,8 +65,8 @@ to execute "justAnotherFile.js" script under "js/someFolder/otherFolder/".
 FAQ
 =========
 
-*Q: How are the scripts loaded?
+* Q: How are the scripts loaded?
 R: They are loaded with synchronous XMLHttpRequest and executed with eval(xmlhttp.responseText);
 
-*Q: eval? Are you fucking crazy? What about security?
+* Q: eval? Are you fucking crazy? What about security?
 R: executejs is not about protecting corporative data that could harness the world peace if leaked. It is about the most simple way to execute files without using script tags. It could be very usefull for games, for example, but it should not by large corporations where security is essential.
