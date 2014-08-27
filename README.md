@@ -4,11 +4,11 @@ executejs
 Execute/run javascript files from within other javascript files from the
 browser easily!!!
 
-
 The purpose of this library is to implement a minimalistic, execution time,
 code inclusion functionality in javascript (like it is done in compile time
 in C with "include", in Java with "import", in C# with "using" and in
-execution time in php with require and require_once), to prevent using several <script> tags into a html file. This is NOT suposed to be an
+execution time in php with require and require_once), to prevent using
+several <script> tags into a html file. This is NOT suposed to be an
 asynchronous module loader like requirejs, or a synchronous module dependency
 resolver and build tool like browserify, it is intended to do at runtime
 exactly what a php interpreter would do when encountering the require and
