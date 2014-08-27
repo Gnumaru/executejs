@@ -15,13 +15,15 @@ From within your index file, include just one script tag for executejs and anoth
 
 Usage
 =========
-From within your index.html file, include just one script tag for executejs and another one for your main js file (you wont need more than your main file anymore =)
+From within your index.html file, include just one script tag for executejs and another one for your main js file.
 ```html
 <head>
   <script src="js/execute.js"></script>
   <script src="js/main.js"></script>
 </head>
 ```
+executejs creates then the global functions "execute" and "executeOnce", wich will be used to load and execute the scripts synchronously.
+
 To execute a file from within another, just use
 
 ```javascript
@@ -59,3 +61,12 @@ For example, you could call
 execute("someFolder/otherFolder/justAnotherFile.js");
 ```
 to execute "justAnotherFile.js" script under "js/someFolder/otherFolder/".
+
+FAQ
+=========
+
+*Q: How are the scripts loaded?
+R: They are loaded with synchronous XMLHttpRequest and executed with eval(xmlhttp.responseText);
+
+*Q: eval? Are you fucking crazy? What about security?
+R: executejs is not about protecting corporative data that could harness the world peace if leaked. It is about the most simple way to execute files without using script tags. It could be very usefull for games, for example, but it should not by large corporations where security is essential.
