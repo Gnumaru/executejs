@@ -42,6 +42,17 @@ executeOnce("myFile");
 ```
 
 executejs expects a folder structure where all code is inside a "js" folder (at the same level as index.html) and its subfolders.
+```
+index.html
+js/
+	fileA.js
+	fileB.js
+	someFolder/
+		anotherFile.js
+		otherFolder/
+			justAnotherFile.js
+```
+
 For example, you could call
 ```javascript
 execute("my/folder/structure/file.js");
