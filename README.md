@@ -55,6 +55,6 @@ js/
 
 For example, you could call
 ```javascript
-execute("my/folder/structure/file.js");
+execute("someFolder/otherFolder/justAnotherFile.js");
 ```
-to execute the "file.js" file under "js/my/folder/structure/".
+to execute "justAnotherFile.js" script under "js/someFolder/otherFolder/".
