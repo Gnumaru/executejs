@@ -1,4 +1,4 @@
-executejs
+EXECUTEJS
 =========
 
 Execute/run javascript files from within other javascript files from the browser easily!!!
