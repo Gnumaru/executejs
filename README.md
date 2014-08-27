@@ -1,9 +1,7 @@
 executejs
 =========
 
-Execute other javascript files from the browser easily (IS NOT A MODULE LOADER)
-
-
+Execute other javascript files from the browser easily
 
 
 The purpose of this library is to implement a minimalistic
@@ -38,4 +36,3 @@ a require("myAwesomeProcedure.js"); inside your scheduler and that's all
 execute.js does not address the scopping (handling conflicts because of using
 global variables) problem AT ALL because that is something you already would
 be addressing by yourself when using several <script> tags
- */
