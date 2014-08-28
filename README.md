@@ -64,7 +64,7 @@ executejs expects a folder structure where all code is inside a root folder, spe
   <script root="js/" main="main.js" src="js/execute.js"></script>
 </head>
 ```
-Your folder structure mus be
+Your folder structure must be
 ```
 index.html
 js/
