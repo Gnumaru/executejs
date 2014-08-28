@@ -57,6 +57,9 @@ works too.
 
 execute( ) will always execute the file, whereas executeOnce( ) will execute it only if it was not already executed by either executeOnce( ) or execute( ). But any script, even if already executed by executeOnce( ), can always be executed again indefinitely by execute( ). The execution counts only if the script is succesfully executed, thus if the execution of a script fails, executeOnce( ) will try to execute it as many times as you tell it to do so.
 
+Folder Structure
+=========
+
 executejs expects a folder structure where all code is inside a "js" folder (at the same level as index.html) and its subfolders.
 ```
 index.html
