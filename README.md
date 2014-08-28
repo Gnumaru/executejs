@@ -112,16 +112,16 @@ FAQ
 =========
 
 * **Q: How are the scripts loaded?**
+
 A: They are loaded with **synchronous** *XMLHttpRequest* and executed with *eval(xmlhttp.responseText)*;
 
 * **Q: eval? Are you fucking crazy? What about security?**
+
 A: executejs is not about protecting corporative data that could harness the world peace if leaked. It is about the most simple way to execute files without using script tags. It could be very usefull for games, for example, but it should not by large corporations where security is essential.
 
 * **Q: But... JQuery already has this functionality, it is the *getScript* function, wich takes a string with the script path, executes it in the global context, and can even execute a callback uppon finishing the execution.**
-A: That's right, JQuery already has this functionality. But if you don't need to use jquery (maybe because you are working only with canvas) it wouldn't be wise to use a 10300 lines of code long library just to get a functionality you could get with less than 50 lines of code.
 
-* **Q: Why you named it executejs?**
-A: Because it reflects well the targeted functionality, to execute scripts. I wanted to use the name requirejs because thats the php's require and require_once methods what I wanted to mimic. But requirejs was already taken by a much bigger and well known project =(. I considered something like includejs, importjs and usingjs, but includejs was already taken, as so was importjs and usingjs. In fact, even executejs was already taken =O right here on github. But as the project's goal was something pretty different from my executejs, I thougth it would no be a big conflict name problem.
+A: That's right, JQuery already has this functionality. But if you don't need to use jquery (maybe because you are working only with canvas) it wouldn't be wise to use a 10300 lines of code long library just to get a functionality you could get with less than 50 lines of code.
 
 * **Q: Can I load cross domain scripts?**
 A: No. the browsers' same domain policies prevent cross domain scripts to be loaded by xmlhttprequest, and that is great because it is secure =). But you can load cross domain scripts inside the code adding programmatically another script tag with the src attribute referencing the desired cross domain script, something like this:
@@ -147,3 +147,7 @@ addAScriptTagToTheHtmlHeader("myfile.js");
 doSomeOtherThing( );
 ```
 the addAScriptTagToTheHtmlHeader would add another script tag, but this another script tag would just be executed after completing the execution of the entire file where addAScriptTagToTheHtmlHeader is called, wich is after doSomeOtherThing( ) and after every other statement in the file.
+
+* **Q: Why you named it executejs?**
+
+A: Because it reflects well the targeted functionality, to execute scripts. I wanted to use the name requirejs because thats the php's require and require_once methods what I wanted to mimic. But requirejs was already taken by a much bigger and well known project =(. I considered something like includejs, importjs and usingjs, but includejs was already taken, as so was importjs and usingjs. In fact, even executejs was already taken =O right here on github. But as the project's goal was something pretty different from my executejs, I thougth it would no be a big conflict name problem.
