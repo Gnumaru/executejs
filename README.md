@@ -15,34 +15,47 @@ From within your index file, include just one script tag for executejs and anoth
 
 Usage
 =========
-From within your index.html file, include just one script tag for executejs and another one for your main js file.
+From within your index.html file, include just one script tag for executejs and any other for other scripts you will be loading.
 ```html
 <head>
   <script src="js/execute.js"></script>
   <script src="js/main.js"></script>
 </head>
 ```
-executejs creates then the global functions "execute" and "executeOnce", wich will be used to load and execute the scripts synchronously.
+executejs creates then the global namespace object "executejs" with the functions "execute" and "executeOnce", wich will be used to load and execute the scripts synchronously. Provide the script tag for executejs before any script tag for scripts that rely on executejs.
 
-To execute a file from within another, just use
+If your browser for some reason load the script tags simultaneously instead of in a sequence, you can provide only the tag for executejs with a "main" attribute that tells execute js wich is the firs script to be loaded:
+```html
+<head>
+  <script main="main.js" src="js/execute.js"></script>
+</head>
+```
+
+To execute a script file from within another, just use
 
 ```javascript
-execute("myFile.js");
+executejs.execute("myFile.js");
 ```
 or
 ```javascript
-executeOnce("myFile.js");
+executejs.executeOnce("myFile.js");
 ```
 
 or without the filetype extension 
 ```javascript
-execute("myFile");
+executejs.execute("myFile");
 ```
 or
 ```javascript
-executeOnce("myFile");
+executejs.executeOnce("myFile");
 ```
-execute() will always execute the file, whereas executeOnce() will execute it only if it was not already executed by executeOnce(). But a script executed by executeOnce() can be executed again by execute().
+The script name can start with a leading slash or not. This:
+```javascript
+executejs.executeOnce("/myFile");
+```
+works too.
+
+execute() will always execute the file, whereas executeOnce() will execute it only if it was not already executed by either executeOnce() or execute(). But any script, even if already executed by executeOnce(), can always be executed again indefinitely by execute(). The execution counts only if the script is succesfully executed, thus if the execution of a script fails, executeOnce() will try to execute it as many times as you tell it to do so.
 
 executejs expects a folder structure where all code is inside a "js" folder (at the same level as index.html) and its subfolders.
 ```
@@ -62,11 +75,16 @@ execute("someFolder/otherFolder/justAnotherFile.js");
 ```
 to execute "justAnotherFile.js" script under "js/someFolder/otherFolder/".
 
+executejs uses only full paths (from within the js folder), so you cannot use relative paths like './' and '../'.
+
 FAQ
 =========
 
 * Q: How are the scripts loaded?
-R: They are loaded with synchronous XMLHttpRequest and executed with eval(xmlhttp.responseText);
+R: They are loaded with **synchronous** *XMLHttpRequest* and executed with *eval(xmlhttp.responseText)*;
 
-* Q: eval? Are you fucking crazy? What about security?
+* Q: **eval**? Are you fucking crazy? What about security?
 R: executejs is not about protecting corporative data that could harness the world peace if leaked. It is about the most simple way to execute files without using script tags. It could be very usefull for games, for example, but it should not by large corporations where security is essential.
+
+* Q: But... JQuery already has this functionality, it is the *getScript* function, wich takes a string with the script path, executes it in the global context, and can even execute a callback uppon finishing the execution.
+R: That's right, JQuery already has this functionality. But if you don't need to use jquery (maybe because you are working only with canvas) it wouldn't be wise to use a 10300 lines of code long library just to get a functionality you could get with less than 50 lines of code.

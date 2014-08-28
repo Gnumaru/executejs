@@ -38,12 +38,15 @@
 'use strict';
 (function() {
   /*
-   * May the globals execute and executeOnce already exist, doesn't define them
-   * again.
+   * May the global namespace object "executejs" already exists, doesn't create
+   * it again.
    */
-  if (typeof window.execute === "undefined" || typeof window.executeOnce === "undefined") {
+  if (typeof window.executejs === "undefined") {
+    //create the "executejs" namespace object
+    var executejs = {}
     var alreadyExecutedScripts = [];
     var jsFileSuffix = ".js";
+    var main;
     var scriptsSource = window.location.href.substring(0, window.location.href.lastIndexOf("/") + 1) + "js/";
     var xmlhttp;
     if (window.XMLHttpRequest) { // real browsers
@@ -52,13 +55,27 @@
       xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
     }
 
+    //gets the main script to be executed, if defined
+    var scripts = document.getElementsByTagName("script");
+    for (var i = 0, length = scripts.length; i < length; i++) {
+      if (scripts[i].getAttribute("src") && scripts[i].getAttribute("src").indexOf("execute.js") !== -1) {
+        main = scripts[i].getAttribute("main");
+        break;
+      }
+    }
+
     /*
      * The function "execute" always executes synchronously the given script,
      * similar to php's "require".
      */
-    window.execute = function(filePath) {
+    executejs.execute = function(filePath) {
+      //append '.js' suffix if already not in use
       if (filePath.lastIndexOf(jsFileSuffix) + jsFileSuffix.length !== filePath.length) {
         filePath += jsFileSuffix;
+      }
+      //remove leading slash (/) if being used
+      if (filePath.indexOf("/") === 0) {
+        filePath = filePath.substr(1);
       }
       xmlhttp.onload = function() {
         try {
@@ -87,7 +104,7 @@
      * The function "executeOnce" executes the given script just once, even if
      * called multiple times, similar to php's "require_once".
      */
-    window.executeOnce = function(filePath) {
+    executejs.executeOnce = function(filePath) {
       var shouldExecute = true;
       for ( var key in alreadyExecutedScripts) {
         if (alreadyExecutedScripts[key] === filePath) {
@@ -96,8 +113,16 @@
         }
       }
       if (shouldExecute) {
-        window.execute(filePath);
+        executejs.execute(filePath);
       }
     };
+
+    //seals the namespace object. It can't be frozen because the "alreadyExecutedScripts" array still needs to be changed over the time
+    Object.seal(executejs);
+    //exposes the "executejs" namespace object through the global window object
+    window.executejs = executejs;
+    if (main) {
+      executejs.executeOnce(main);
+    }
   }
 })();
