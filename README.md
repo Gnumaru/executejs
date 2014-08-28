@@ -92,3 +92,13 @@ A: That's right, JQuery already has this functionality. But if you don't need to
 
 * **Q: Why you named it executejs?**
 A: Because it reflects well the targeted functionality, to execute scripts. I wanted to use the name requirejs because thats the php's require and require_once methods what I wanted to mimic. But requirejs was already taken by a much bigger and well known project =(. I considered something like includejs, importjs and usingjs, but includejs was already taken, as so was importjs and usingjs. In fact, even executejs was already taken =O right here on github. But as the project's goal was something pretty different from my executejs, I thougth it would no be a big conflict name problem.
+
+* **Q: Can I load cross domain scripts?**
+A: No. the browsers same domain policies prevent cross domain scripts to be loaded by xmlhttprequest, and that is great because it is secure =). But you can load cross domain scripts inside the code adding programmatically another script tag with the src attribute referencing the desired cross domain script, something like this:
+```javascript
+var script = document.createElement('script');
+script.src = "http://my.cross.domain/script.js";
+script.onload = function () {
+    //use script
+};
+```
