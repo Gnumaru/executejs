@@ -11,8 +11,6 @@ execute.js intend to address this problem in a very simple and minimalistic way.
 
 **execute.js does not address the scopping problem (handling conflicts due to using global variables) AT ALL** because that is something you already would be addressing by yourself when using several script tags or concatenating script files with GNU's cat command or other simple file concatenation tools.
 
-From within your index file, include just one script tag for executejs and another one for your main js file (you wont need more than your main file anymore =)
-
 Usage
 =========
 From within your index.html file, include just one script tag for executejs and any other for other scripts you will be loading.
