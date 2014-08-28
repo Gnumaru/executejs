@@ -16,8 +16,8 @@ Usage
 From within your index.html file, include just one script tag for executejs and any other for other scripts you will be loading.
 ```html
 <head>
-  <script src="js/execute.js"></script>
-  <script src="js/main.js"></script>
+  <script root="js/" src="js/execute.js"></script>
+  <script src="main.js"></script>
 </head>
 ```
 executejs creates then the global namespace object "executejs" with the functions "execute" and "executeOnce", wich will be used to load and execute the scripts synchronously. Provide the script tag for executejs before any script tag for scripts that rely on executejs.
@@ -25,7 +25,7 @@ executejs creates then the global namespace object "executejs" with the function
 If your browser for some reason load the script tags simultaneously instead of in a sequence, you can provide only the tag for executejs with a "main" attribute that tells execute js wich is the firs script to be loaded:
 ```html
 <head>
-  <script main="main.js" src="js/execute.js"></script>
+  <script root="js/" main="main.js" src="js/execute.js"></script>
 </head>
 ```
 
@@ -58,16 +58,44 @@ execute( ) will always execute the file, whereas executeOnce( ) will execute it 
 Folder Structure
 =========
 
-executejs expects a folder structure where all code is inside a "js" folder (at the same level as index.html) and its subfolders.
+executejs expects a folder structure where all code is inside a root folder, specified in the executejs script tag, at the same level as index.html, and its subfolders. For example, if you specify
+```html
+<head>
+  <script root="js/" main="main.js" src="js/execute.js"></script>
+</head>
+```
+Your folder structure mus be
 ```
 index.html
 js/
-	fileA.js
+	main.js
 	fileB.js
 	someFolder/
 		anotherFile.js
 		otherFolder/
 			justAnotherFile.js
+```
+Or if you don't provide a root attribute
+```html
+<head>
+  <script main="main.js" src="js/execute.js"></script>
+</head>
+```
+or provide it empty
+```html
+<head>
+  <script root="" main="main.js" src="js/execute.js"></script>
+</head>
+```
+The root folder will be the one where index.html is
+```
+index.html
+main.js
+fileB.js
+someFolder/
+	anotherFile.js
+	otherFolder/
+		justAnotherFile.js
 ```
 
 For example, you could call

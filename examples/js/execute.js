@@ -47,7 +47,7 @@
     var alreadyExecutedScripts = [];
     var jsFileSuffix = ".js";
     var main;
-    var scriptsSource = window.location.href.substring(0, window.location.href.lastIndexOf("/") + 1) + "js/";
+    var root;
     var xmlhttp;
     if (window.XMLHttpRequest) { // real browsers
       xmlhttp = new XMLHttpRequest();
@@ -60,9 +60,22 @@
     for (var i = 0, length = scripts.length; i < length; i++) {
       if (scripts[i].getAttribute("src") && scripts[i].getAttribute("src").indexOf("execute.js") !== -1) {
         main = scripts[i].getAttribute("main");
+        root = scripts[i].getAttribute("root");
         break;
       }
     }
+    //sets the script root folder
+    if (root) {
+      if (root.indexOf("/") === 0) {
+        root = root.substr(1);
+      }
+      if (root.lastIndexOf("/") !== root.length - 1) {
+        root += "/";
+      }
+    } else {
+      root = "";
+    }
+    var scriptsSource = window.location.href.substring(0, window.location.href.lastIndexOf("/") + 1) + root;
 
     /*
      * The function "execute" always executes synchronously the given script,
