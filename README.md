@@ -141,13 +141,13 @@ doSomething( );
 executejs.execute("myfile.js");
 doSomeOtherThing( );
 ```
-the content of "myfile.js" will be executed exactly after doSomething( ) and exactly before doSomeOtherThing( ). Instead, if we had the folowing:
+the content of `"myfile.js"` will be executed exactly after doSomething( ) and exactly before doSomeOtherThing( ). Instead, if we had the folowing:
 ```javascript
 doSomething( );
 addAScriptTagToTheHtmlHeader("myfile.js");
 doSomeOtherThing( );
 ```
-the `addAScriptTagToTheHtmlHeader()` would add another script tag, but this another script tag would be executed only after completing the execution of the entire file where `addAScriptTagToTheHtmlHeader()` is called, wich is after doSomeOtherThing( ) and after every other statement in the file. Normaly, when you use includes/imports/usings/requires, you expect the required code to be available/executed right after the completion of the include/import/using/require call.
+the `addAScriptTagToTheHtmlHeader()` would add another script tag, but this another script tag would be executed only after completing the execution of the entire file where `addAScriptTagToTheHtmlHeader()` is called, wich is after `doSomeOtherThing()` and after every other statement in the file. Normaly, when you use includes/imports/usings/requires, you expect the required code to be available/executed right after the completion of the include/import/using/require call.
 
 * **Q: Why you named it executejs?**
 
