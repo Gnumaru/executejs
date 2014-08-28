@@ -124,6 +124,7 @@ A: executejs is not about protecting corporative data that could harness the wor
 A: That's right, JQuery already has this functionality. But if you don't need to use jquery (maybe because you are working only with canvas) it wouldn't be wise to use a 10300 lines of code long library just to get a functionality you could get with less than 50 lines of code.
 
 * **Q: Can I load cross domain scripts?**
+
 A: No. the browsers' same domain policies prevent cross domain scripts to be loaded by xmlhttprequest, and that is great because it is secure =). But you can load cross domain scripts inside the code adding programmatically another script tag with the src attribute referencing the desired cross domain script, something like this:
 ```javascript
 var script = document.createElement('script');
