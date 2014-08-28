@@ -104,7 +104,7 @@ execute("someFolder/otherFolder/justAnotherFile.js");
 ```
 to execute "justAnotherFile.js" script under "someFolder/otherFolder/".
 
-executejs uses only full paths (from within the js folder), so you cannot use relative paths like './' and '../'.
+executejs uses only full paths (relative to the root folder), so you cannot use relative paths like './' and '../'.
 
 FAQ
 =========
