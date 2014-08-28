@@ -98,11 +98,11 @@ someFolder/
 		justAnotherFile.js
 ```
 
-For example, you could call
+In this scenario, you could call
 ```javascript
 execute("someFolder/otherFolder/justAnotherFile.js");
 ```
-to execute "justAnotherFile.js" script under "js/someFolder/otherFolder/".
+to execute "justAnotherFile.js" script under "someFolder/otherFolder/".
 
 executejs uses only full paths (from within the js folder), so you cannot use relative paths like './' and '../'.
 
