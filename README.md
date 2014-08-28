@@ -141,7 +141,7 @@ doSomething( );
 executejs.execute("myfile.js");
 doSomeOtherThing( );
 ```
-the content of `"myfile.js"` will be executed exactly after doSomething( ) and exactly before doSomeOtherThing( ). Instead, if we had the folowing:
+the content of `javascript "myfile.js"` will be executed exactly after doSomething( ) and exactly before doSomeOtherThing( ). Instead, if we had the folowing:
 ```javascript
 doSomething( );
 addAScriptTagToTheHtmlHeader("myfile.js");
