@@ -65,7 +65,7 @@
       }
     }
     //sets the script root folder
-    if (root) {
+    if (root && root !== "") {
       if (root.indexOf("/") === 0) {
         root = root.substr(1);
       }

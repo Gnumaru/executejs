@@ -132,3 +132,17 @@ script.onload = function () {
     //use script
 };
 ```
+* Q: **But why not include several script tags instead of using eval over an XMLHttpRequest.responseText? Evalling an XMLHttpRequest.responseText prevents debugging AT ALL**
+A: Indeed, evalling a string prevents debugging **AT ALL**. But without eval, it is impossible to call code **within** code, just call code **between** code. Using eval, you can execute an entire javascript file within another javascript file. But adding script headers on the fly make the browser load the script **just after** it finishes executing the current script. For example, given folowing code:
+```javascript
+doSomething( );
+executejs.execute("myfile.js");
+doSomeOtherThing( );
+```
+the content of "myfile.js" will be executed exactly after doSomething( ) and exactly before doSomeOtherThing( ). Instead, if we had the folowing:
+```javascript
+doSomething( );
+addAScriptTagToTheHtmlHeader("myfile.js");
+doSomeOtherThing( );
+```
+the addAScriptTagToTheHtmlHeader would add another script tag, but this another script tag would just be executed after completing the execution of the entire file where addAScriptTagToTheHtmlHeader is called, wich is after doSomeOtherThing( ) and after every other statement in the file.
