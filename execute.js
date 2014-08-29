@@ -62,7 +62,7 @@
     var alreadyExecutedScripts = {};
     var jsFileSuffix = ".js";
     var moduleHeader = "var exports = {};\r\n";
-    var moduleFooter = "\r\nreturn exports;";
+    var moduleFooter = ";\r\nreturn exports;";
     var main;
     var root;
     var xmlhttp;
