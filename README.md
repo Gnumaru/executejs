@@ -7,7 +7,7 @@ The purpose of this library is to implement a minimalistic, execution time, code
 
 There is not yet a greatly accepted standard for javascript code modularity handling (I'm not talking about code modules definitions and usage, that is already covered by Comonjs and AMD, but code modularity, the way by which code is separated into several files and executed as is or preprocessed and bundled into a single file). Many use several build tools like browserify or other tools to parse dependencies and preprocess/concatenate files accordingly. Others use libraries like require.js to load different module files at runtime, and others separate their code into several script files and add several include tags in the page header.
 
-execute.js intend to address this problem in a very simple and minimalistic way. It is intended to be a minimalistc tool to execute a given in-domain script that may contain dependencies for the script which is calling it, or that contais simple procedures to be executed. Say you have a "Person" class (javascript constructor function) defined into "http://(websiteurl)/js/model/Person.js" and you want to use this class into several other files. Just execute once the file with executejs.executeOnce("model/Person.js"), and the class will be defined in whatever scope/namespace it was defined in the Person.js file by the application lifetime. Even if you executeOnce( ) the same file several times, the constructor function inside Person.js will not be overwritten because executejs has already executed it and executeOnce will prevent the file to be executed again. Or say you have a procedure that is schedulled (by whathever means) to be executed continuously every minute. you could just put a require("myAwesomeProcedure.js"); inside your scheduler and that's all
+execute.js intend to address this problem in a very simple and minimalistic way. It is intended to be a minimalistc tool to execute a given in-domain script that may contain dependencies for the script which is calling it, or that contais simple procedures to be executed. Say you have a "Person" class (javascript constructor function) defined into "http://(websiteurl)/js/model/Person.js" and you want to use this class into several other files. Just execute once the file with executejs.executeOnce("model/Person.js"), and the class will be defined in whatever scope/namespace it was defined in the Person.js file by the application lifetime. Even if you `executeOnce()` the same file several times, the constructor function inside Person.js will not be overwritten because executejs has already executed it and executeOnce will prevent the file to be executed again. Or say you have a procedure that is schedulled (by whathever means) to be executed continuously every minute. you could just put a require("myAwesomeProcedure.js"); inside your scheduler and that's all
 
 **execute.js does not address the scopping problem (handling conflicts due to using global variables) AT ALL** because that is something you already would be addressing by yourself when using several script tags or concatenating script files with GNU's cat command or other simple file concatenation tools.
 
@@ -53,7 +53,7 @@ executejs.executeOnce("/myFile");
 ```
 works too.
 
-execute( ) will always execute the file, whereas executeOnce( ) will execute it only if it was not already executed by either executeOnce( ) or execute( ). But any script, even if already executed by executeOnce( ), can always be executed again indefinitely by execute( ). The execution counts only if the script is succesfully executed, thus if the execution of a script fails, executeOnce( ) will try to execute it as many times as you tell it to do so.
+`execute()` will always execute the file, whereas `executeOnce()` will execute it only if it was not already executed by either `executeOnce()` or `execute()`. But any script, even if already executed by `executeOnce()`, can always be executed again indefinitely by `execute()`. The execution counts only if the script is succesfully executed, thus if the execution of a script fails, `executeOnce()` will try to execute it as many times as you tell it to do so.
 
 Folder Structure
 =========
@@ -137,15 +137,15 @@ script.onload = function () {
 
 A: Indeed, evalling a string prevents debugging **AT ALL** (although firefox shows the error lines **inside** the evalled files if you do not use try-catches while evalling the string). But without eval, it is impossible to call code **within** code, just call code **between** code. Using eval, you can execute an entire javascript file within another javascript file, between two lines of your code for example. But adding script headers on the fly make the browser load the script **just after** it finishes executing the current script. For example, given folowing code:
 ```javascript
-doSomething( );
+doSomething();
 executejs.execute("myfile.js");
-doSomeOtherThing( );
+doSomeOtherThing();
 ```
 the content of `"myfile.js"` will be executed entirely exactly after `doSomething()` and exactly before `doSomeOtherThing()`. Instead, if we had the folowing:
 ```javascript
-doSomething( );
+doSomething();
 addAScriptTagToHtmlHeader("myfile.js");
-doSomeOtherThing( );
+doSomeOtherThing();
 ```
 the `addAScriptTagToHtmlHeader()` would add another script tag, but this another script tag would be executed **only after completing the execution of the entire file where `addAScriptTagToTheHtmlHeader()` is called**, wich is after `doSomeOtherThing()` and after every other statement in the file. Normaly, when you use includes/imports/usings/requires, you expect the required code to be available/executed right after the completion of the include/import/using/require call.
 
