@@ -59,7 +59,9 @@
     //create the "executejs" namespace object
     var executejs = {};
     //"hashmap" containing already executed scripts as functions an its file paths
-    var alreadyExecutedScripts = {};
+    var executedScriptsCache = {};
+    //stack containing the scripts that have been executed but had not already finished execution. It is necessary to prevent circular loops
+    var executionStack = [];
     var jsFileSuffix = ".js";
     var moduleHeader = "var exports = {};\r\n";
     var moduleFooter = ";\r\nreturn exports;";
@@ -100,43 +102,51 @@
      */
     executejs.execute = function(filePath) {
       filePath = normalizeFilePath(filePath);
+      var shouldExecute = true;
+      for ( var key in executionStack) {
+        if (executionStack[key] === filePath) {
+          shouldExecute = false;
+          console.warn("Prevented execution of " + filePath + " due to previous execution not yet completed.");
+        }
+      }
       var returnValue;
-      if (typeof alreadyExecutedScripts[filePath] === "undefined") {
-        //if script has already not been executed, retrieve it via xmlhttp and create a new function wit its content.
-        console.log("Retrieving \"" + filePath + "\" through XMLHttpRequest.");
-        xmlhttp.onload = function() {
+      if (shouldExecute) {
+        if (typeof executedScriptsCache[filePath] === "undefined") {
+          //if script has already not been executed, retrieve it via xmlhttp and create a new function wit its content.
+          console.log("Retrieving \"" + filePath + "\" through XMLHttpRequest.");
+          xmlhttp.onload = function() {
+            try {
+              //cache the script into a function for later execution
+              var func = new Function(moduleHeader + xmlhttp.responseText + moduleFooter);
+              console.log("Executing " + filePath + ".");
+              executionStack.push(filePath);
+              //call the function setting "window" to "this" so every global defined there would still be defined as global.
+              returnValue = func.call(window);
+              executionStack.pop();
+              executedScriptsCache[filePath] = func;
+            } catch (err) {
+              //the "try catch" catches the evaluation errors but hides the actual line the error ocurred in the evaluated file. if this "try catch" is ommited, firefox console tells an error occured in execute.js, but the line it tells the error ocurred is the line in the actual file whose content was evalled (the one retrieved by XMLHttpRequest). Chrome behaves differently =(
+              var errorMessage = "Error trying to execute \"" + filePath + "\".\r\nJavascript engine's error message:\r\n==========\r\n" + err + "\r\n==========\r\n";
+              throw new Error(errorMessage);
+            }
+          };
+
+          //forces synchronous script execution with third parameter set to false
+          xmlhttp.open("GET", scriptsSource + filePath, false);
           try {
-            //call eval with window as 'this' so the script will be purpusefully executed in the global scope, as if it where executed via a <script> tag
-            //eval.call(window, xmlhttp.responseText);
-            //cache the script into a function for later execution
-            var func = new Function(moduleHeader + xmlhttp.responseText + moduleFooter);
-            console.log("Executing " + filePath + ".");
-            //call the function setting "window" to "this" so every global defined there would still be defined as global.
-            returnValue = func.call(window);
-            alreadyExecutedScripts[filePath] = func;
-            return returnValue;
+            xmlhttp.send();
           } catch (err) {
-            //the "try catch" catches the evaluation errors but hides the actual line the error ocurred in the evaluated file. if this "try catch" is ommited, firefox console tells an error occured in execute.js, but the line it tells the error ocurred is the line in the actual file whose content was evalled (the one retrieved by XMLHttpRequest). Chrome behaves differently =(
-            var errorMessage = "Error trying to execute \"" + filePath + "\".\r\nJavascript engine's error message:\r\n==========\r\n" + err + "\r\n==========\r\n";
+            var errorMessage = "Error trying to request \"" + filePath + "\".\r\nJavascript engine's error message:\r\n==========\r\n" + err.message + "\r\n==========\r\n";
+            if (err.message.indexOf("Access to restricted URI denied") !== -1) {
+              errorMessage += "Probably the referenced script is mispelled or doesn't exist.";
+            }
             throw new Error(errorMessage);
           }
-        };
-
-        //forces synchronous script execution with third parameter set to false
-        xmlhttp.open("GET", scriptsSource + filePath, false);
-        try {
-          xmlhttp.send();
-        } catch (err) {
-          var errorMessage = "Error trying to request \"" + filePath + "\".\r\nJavascript engine's error message:\r\n==========\r\n" + err.message + "\r\n==========\r\n";
-          if (err.message.indexOf("Access to restricted URI denied") !== -1) {
-            errorMessage += "Probably the referenced script is mispelled or doesn't exist.";
-          }
-          throw new Error(errorMessage);
+        } else {
+          //else, execute the function already stored
+          console.log("Executing cache for " + filePath + ".");
+          returnValue = executedScriptsCache[filePath].call(window);
         }
-      } else {
-        //else, execute the function already stored
-        console.log("Executing cache for " + filePath + ".");
-        returnValue = alreadyExecutedScripts[filePath].call(window);
       }
       return returnValue;
     };
@@ -148,19 +158,21 @@
     executejs.executeOnce = function(filePath) {
       filePath = normalizeFilePath(filePath);
       var shouldExecute = true;
-      for ( var key in alreadyExecutedScripts) {
-        //if the alreadyExecutedScripts hashmap contains the key and it is equal to the file path, tell to not execute the script again
-        if (alreadyExecutedScripts.hasOwnProperty(key) && key === filePath) {
+      for ( var key in executedScriptsCache) {
+        //if the executedScriptsCache hashmap contains the key and it is equal to the file path, tell to not execute the script again
+        if (executedScriptsCache.hasOwnProperty(key) && key === filePath) {
           shouldExecute = false;
           break;
         }
       }
       if (shouldExecute) {
         return executejs.execute(filePath);
+      } else {
+        console.warn("Prevented execution of " + filePath + " by executeOnce(). " + filePath + " has already been executed.");
       }
     };
 
-    //seals the namespace object. It can't be frozen because the "alreadyExecutedScripts" array still needs to be changed over the time
+    //seals the namespace object. It can't be frozen because the "executedScriptsCache" array still needs to be changed over the time
     Object.seal(executejs);
     //exposes the "executejs" namespace object through the global window object
     window.executejs = executejs;
