@@ -61,6 +61,8 @@
     //"hashmap" containing already executed scripts as functions an its file paths
     var alreadyExecutedScripts = {};
     var jsFileSuffix = ".js";
+    var moduleHeader = "var exports = {};\r\n";
+    var moduleFooter = "\r\nreturn exports;";
     var main;
     var root;
     var xmlhttp;
@@ -98,21 +100,24 @@
      */
     executejs.execute = function(filePath) {
       filePath = normalizeFilePath(filePath);
+      var returnValue;
       if (typeof alreadyExecutedScripts[filePath] === "undefined") {
         //if script has already not been executed, retrieve it via xmlhttp and create a new function wit its content.
-        console.warn("Retrieving \"" + filePath + "\" through XMLHttpRequest.");
+        console.log("Retrieving \"" + filePath + "\" through XMLHttpRequest.");
         xmlhttp.onload = function() {
           try {
             //call eval with window as 'this' so the script will be purpusefully executed in the global scope, as if it where executed via a <script> tag
             //eval.call(window, xmlhttp.responseText);
             //cache the script into a function for later execution
-            var func = new Function(xmlhttp.responseText);
+            var func = new Function(moduleHeader + xmlhttp.responseText + moduleFooter);
+            console.log("Executing " + filePath + ".");
             //call the function setting "window" to "this" so every global defined there would still be defined as global.
-            func.call(window);
+            returnValue = func.call(window);
             alreadyExecutedScripts[filePath] = func;
+            return returnValue;
           } catch (err) {
             //the "try catch" catches the evaluation errors but hides the actual line the error ocurred in the evaluated file. if this "try catch" is ommited, firefox console tells an error occured in execute.js, but the line it tells the error ocurred is the line in the actual file whose content was evalled (the one retrieved by XMLHttpRequest). Chrome behaves differently =(
-            var errorMessage = "Error trying to execute \"" + filePath + "\".\r\nJavascript engine's error message:\r\n==========\r\n" + err.message + "\r\n==========\r\n";
+            var errorMessage = "Error trying to execute \"" + filePath + "\".\r\nJavascript engine's error message:\r\n==========\r\n" + err + "\r\n==========\r\n";
             throw new Error(errorMessage);
           }
         };
@@ -130,9 +135,10 @@
         }
       } else {
         //else, execute the function already stored
-        console.warn("Using cache for " + filePath + ".");
-        alreadyExecutedScripts[filePath].call(window);
+        console.log("Executing cache for " + filePath + ".");
+        returnValue = alreadyExecutedScripts[filePath].call(window);
       }
+      return returnValue;
     };
 
     /*

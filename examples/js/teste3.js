@@ -1,4 +1,5 @@
 'use strict';
-executejs.execute("a/teste4");
+var a = executejs.execute("a/teste4");
+alert(a.test);
 
 alert("teste3");
