@@ -1,17 +1,19 @@
 EXECUTEJS
 =========
 
-Execute/run javascript files from within other javascript files from the browser easily!!!
+Write and Load CommonJS modules or arbitrary javascript files from the browser, **without building everything into a single js file**.
 
-The purpose of this library is to implement a minimalistic, execution time, code inclusion functionality in javascript (like it is done in compile time in C with "include", in Java with "import", in C# with "using" and in execution time in php with require and require_once), to prevent using several script tags into a html file. This is NOT suposed to be an asynchronous module loader like requirejs, or a synchronous module dependency resolver and build tool like browserify, it is intended to do at runtime exactly what a php interpreter would do when encountering the require and require_once function calls, or what a C compiler preprocessor would do with a include statement
+The main purpose of this library is to implement a simple, straightfoward, execution time, code inclusion/execution functionality in javascript (like it is done in compile time in C with "include", in Java with "import", in C# with "using" and in execution time in php with require and require_once), to prevent using several script tags into a html file. This is NOT suposed to be an asynchronous module loader like requirejs, or a synchronous module dependency resolver and build tool like browserify, it is intended to do at runtime exactly what a php interpreter would do when encountering the require and require_once function calls, or what a C compiler preprocessor would do with a include statement. Additionally, it support loading commonjs style modules on the browser without a build step, without bundling every js file into only one.
 
 There is not yet a greatly accepted standard for javascript code modularity handling (I'm not talking about code modules definitions and usage, that is already covered by Comonjs and AMD, but code modularity, the way by which code is separated into several files and executed as is or preprocessed and bundled into a single file). Many use several build tools like browserify or other tools to parse dependencies and preprocess/concatenate files accordingly. Others use libraries like require.js to load different module files at runtime, and others separate their code into several script files and add several include tags in the page header.
 
-execute.js intend to address this problem in a very simple and minimalistic way. It is intended to be a minimalistc tool to execute a given in-domain script that may contain dependencies for the script which is calling it, or that contais simple procedures to be executed. Say you have a "Person" class (javascript constructor function) defined into "http://(websiteurl)/js/model/Person.js" and you want to use this class into several other files. Just execute once the file with executejs.executeOnce("model/Person.js"), and the class will be defined in whatever scope/namespace it was defined in the Person.js file by the application lifetime. Even if you `executeOnce()` the same file several times, the constructor function inside Person.js will not be overwritten because executejs has already executed it and executeOnce will prevent the file to be executed again. Or say you have a procedure that is schedulled (by whathever means) to be executed continuously every minute. you could just put a require("myAwesomeProcedure.js"); inside your scheduler and that's all
+execute.js intend to address this problem in a very simple and minimalistic way. It is intended to be a minimalistc tool to execute a given in-domain script that may contain dependencies for the script which is calling it, or that contais simple procedures to be executed. Say you have a "Person" class (javascript constructor function) defined into "http://(websiteurl)/js/model/Person.js" and you want to use this class into several other files. Just execute once the file with executejs.executeOnce("model/Person.js"), and the class will be defined in whatever scope/namespace it was defined in the Person.js file by the application lifetime. Even if you `executeOnce()` the same file several times, the constructor function inside Person.js will not be overwritten because executejs has already executed it and executeOnce will prevent the file to be executed again. Or say you have a procedure that is schedulled (by whathever means) to be executed continuously every minute. you could just put a require("myAwesomeProcedure.js"); inside your scheduler and that's all.
+
+If not yet defined, executejs will also define a `require()` function for loading CommonJS style modules, with some limitations.
 
 **execute.js does not address the scopping problem (handling conflicts due to using global variables) AT ALL** because that is something you already would be addressing by yourself when using several script tags or concatenating script files with GNU's cat command or other simple file concatenation tools.
 
-Usage
+Normal Usage
 =========
 From within your index.html file, include just one script tag for executejs and any other for other scripts you will be loading.
 ```html
@@ -54,6 +56,29 @@ executejs.executeOnce("/myFile");
 works too.
 
 `execute()` will always execute the file, whereas `executeOnce()` will execute it only if it was not already executed by either `executeOnce()` or `execute()`. But any script, even if already executed by `executeOnce()`, can always be executed again indefinitely by `execute()`. The execution counts only if the script is succesfully executed, thus if the execution of a script fails, `executeOnce()` will try to execute it as many times as you tell it to do so.
+
+CommonJS Style Modules
+=========
+
+If your scripts define modules in the commonjs style, executejs can load them, with some limitations. You can just define a module:
+```javascript
+//file a.js
+exports.awesomeFunction = new function(){
+	alert("This function is awesome!!!");
+};
+```
+and require it into another js file:
+```javascript
+//file b.js
+var func = require("a.js").awesomeFunction;
+//this also works
+func = require("a").awesomeFunction;
+func();
+```
+
+executejs can not yet handle ciclic dependencies, it will just return undefined if you try to require or execute a file whose evaluation by an previous require has not yet completed.
+
+Additionally, executejs handles only full file paths, not relative paths like "./" and "../"
 
 Folder Structure
 =========
