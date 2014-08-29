@@ -1,7 +1,7 @@
 EXECUTEJS
 =========
 
-Write and Load CommonJS modules or arbitrary javascript files from the browser, **without building everything into a single js file**.
+**Execute arbitrary javascript files** or **write and load CommonJS modules** from the browser, without building everything into a single js file.
 
 The main purpose of this library is to implement a simple, straightfoward, execution time, code inclusion/execution functionality in javascript (like it is done in compile time in C with "include", in Java with "import", in C# with "using" and in execution time in php with require and require_once), to prevent using several script tags into a html file. This is NOT suposed to be an asynchronous module loader like requirejs, or a synchronous module dependency resolver and build tool like browserify, it is intended to do at runtime exactly what a php interpreter would do when encountering the require and require_once function calls, or what a C compiler preprocessor would do with a include statement. Additionally, it support loading commonjs style modules on the browser without a build step, without bundling every js file into only one.
 
