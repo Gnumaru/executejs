@@ -42,9 +42,24 @@
    * it again.
    */
   if (typeof window.executejs === "undefined") {
+    //function to normalize file path, including the .js suffix if omited, and removing leading slash if provided.
+    //'use strict' dos not permit function declarations inside other functions if it is not the first statement of the function, thus it is only possible to put int inside the "if" if it is an attribution to a variable;
+    var normalizeFilePath = function(filePath) {
+      //append '.js' suffix if already not in use
+      if (filePath.lastIndexOf(jsFileSuffix) + jsFileSuffix.length !== filePath.length) {
+        filePath += jsFileSuffix;
+      }
+      //remove leading slash (/) if being used
+      if (filePath.indexOf("/") === 0) {
+        filePath = filePath.substr(1);
+      }
+      return filePath;
+    };
+
     //create the "executejs" namespace object
-    var executejs = {}
-    var alreadyExecutedScripts = [];
+    var executejs = {};
+    //"hashmap" containing already executed scripts as functions an its file paths
+    var alreadyExecutedScripts = {};
     var jsFileSuffix = ".js";
     var main;
     var root;
@@ -82,34 +97,41 @@
      * similar to php's "require".
      */
     executejs.execute = function(filePath) {
-      //append '.js' suffix if already not in use
-      if (filePath.lastIndexOf(jsFileSuffix) + jsFileSuffix.length !== filePath.length) {
-        filePath += jsFileSuffix;
-      }
-      //remove leading slash (/) if being used
-      if (filePath.indexOf("/") === 0) {
-        filePath = filePath.substr(1);
-      }
-      xmlhttp.onload = function() {
+      filePath = normalizeFilePath(filePath);
+      if (typeof alreadyExecutedScripts[filePath] === "undefined") {
+        //if script has already not been executed, retrieve it via xmlhttp and create a new function wit its content.
+        console.warn("Retrieving \"" + filePath + "\" through XMLHttpRequest.");
+        xmlhttp.onload = function() {
+          try {
+            //call eval with window as 'this' so the script will be purpusefully executed in the global scope, as if it where executed via a <script> tag
+            //eval.call(window, xmlhttp.responseText);
+            //cache the script into a function for later execution
+            var func = new Function(xmlhttp.responseText);
+            //call the function setting "window" to "this" so every global defined there would still be defined as global.
+            func.call(window);
+            alreadyExecutedScripts[filePath] = func;
+          } catch (err) {
+            //the "try catch" catches the evaluation errors but hides the actual line the error ocurred in the evaluated file. if this "try catch" is ommited, firefox console tells an error occured in execute.js, but the line it tells the error ocurred is the line in the actual file whose content was evalled (the one retrieved by XMLHttpRequest). Chrome behaves differently =(
+            var errorMessage = "Error trying to execute \"" + filePath + "\".\r\nJavascript engine's error message:\r\n==========\r\n" + err.message + "\r\n==========\r\n";
+            throw new Error(errorMessage);
+          }
+        };
+
+        //forces synchronous script execution with third parameter set to false
+        xmlhttp.open("GET", scriptsSource + filePath, false);
         try {
-          //call eval with window as 'this' so the script will be purpusefully executed in the global scope, as if it where executed via a <script> tag
-          eval.call(window, xmlhttp.responseText);
-          alreadyExecutedScripts.push(filePath);
+          xmlhttp.send();
         } catch (err) {
-          var errorMessage = "Error trying to execute \"" + filePath + "\".\r\nJavascript engine's error message:\r\n==========\r\n" + err.message + "\r\n==========\r\n";
+          var errorMessage = "Error trying to request \"" + filePath + "\".\r\nJavascript engine's error message:\r\n==========\r\n" + err.message + "\r\n==========\r\n";
+          if (err.message.indexOf("Access to restricted URI denied") !== -1) {
+            errorMessage += "Probably the referenced script is mispelled or doesn't exist.";
+          }
           throw new Error(errorMessage);
         }
-      };
-      //forces synchronous script execution with third parameter equals false
-      xmlhttp.open("GET", scriptsSource + filePath, false);
-      try {
-        xmlhttp.send();
-      } catch (err) {
-        var errorMessage = "Error trying to request \"" + filePath + "\".\r\nJavascript engine's error message:\r\n==========\r\n" + err.message + "\r\n==========\r\n";
-        if (err.message.indexOf("Access to restricted URI denied") !== -1) {
-          errorMessage += "Probably the referenced script is mispelled or doesn't exist."
-        }
-        throw new Error(errorMessage);
+      } else {
+        //else, execute the function already stored
+        console.warn("Using cache for " + filePath + ".");
+        alreadyExecutedScripts[filePath].call(window);
       }
     };
 
@@ -118,9 +140,11 @@
      * called multiple times, similar to php's "require_once".
      */
     executejs.executeOnce = function(filePath) {
+      filePath = normalizeFilePath(filePath);
       var shouldExecute = true;
       for ( var key in alreadyExecutedScripts) {
-        if (alreadyExecutedScripts[key] === filePath) {
+        //if the alreadyExecutedScripts hashmap contains the key and it is equal to the file path, tell to not execute the script again
+        if (alreadyExecutedScripts.hasOwnProperty(key) && key === filePath) {
           shouldExecute = false;
           break;
         }
