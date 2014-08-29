@@ -133,6 +133,11 @@ The root attribute can be specified with or without leading or trailling slashes
 
 executejs uses only full paths (relative to the root folder), so you cannot use relative paths like './' and '../'.
 
+Known Problems
+=========
+* Using `eval("//some code inside a string")` or `new Function("//some code inside a string")` instead of adding programatically new script tags to the html prevents debugging. That is not a problem at all in production environment, since the end user should not be debugging the application aniway, but it certainly is awfull for development. executejs is inspired in RequireJS in the sense that RequireJS doesn't impose a way of use. RequireJS apps can be bundled into one big js file, or can be distributed as separate files. This is the opposite of Browserify, wich imposes the build step and does'nt provide a runtime for module loading in the browser.
+* Using separate files certainly impose performance penalties due to several http requests and probably preventing optmizations from the js engines. Of course bundling the entire code base into one js file is faster, as it its loaded with one single http request and "probably" be better optimized by the js engines. The question is not "It is slower?", but "How much slower?" or even better "It is perceptibly slower?". Since executejs supports module loading using commonjs style, you can try your application with executejs calling a main file, and afterwards bundle the application using browserify and compare the performance **as perceived by the user**. Without making any kind of benchmark, I would be inclined to say that bunbling everything is certainly better performancewise, but I would also be inclined to say that it would make no noticeable difference. That exists many kinds of software with many different goals, which could be more or less impacted by the penalties imposed for not bundling everything into one single js file. Since it is possible to easily test both, do it, and see what is better for your application.
+
 FAQ
 =========
 
