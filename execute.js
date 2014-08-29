@@ -156,7 +156,7 @@
         }
       }
       if (shouldExecute) {
-        executejs.execute(filePath);
+        return executejs.execute(filePath);
       }
     };
 
@@ -164,6 +164,11 @@
     Object.seal(executejs);
     //exposes the "executejs" namespace object through the global window object
     window.executejs = executejs;
+    //if there is no globa require function defined, create it as a reference to "executejs.executeOnce()"
+    if (typeof window.require === "undefined") {
+      window.require = executejs.executeOnce;
+    }
+    //if an application entry point was defined, run it now!
     if (main) {
       executejs.executeOnce(main);
     }
