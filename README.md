@@ -113,19 +113,19 @@ FAQ
 
 * **Q: How are the scripts loaded?**
 
-A: They are loaded with **synchronous** *XMLHttpRequest* and executed with *eval(xmlhttp.responseText)*;
+A: Since javascript doesn't have such functionality built into the language (yet), there are currently **ONLY TWO** (cross browser, plugin independent) ways of loading one script file from another without adding several script tags "by hand". You can eval another file, or you can add programmatically another script tag in your html after the script tag belonging to the script being executed. executejs load the scripts with **purposefully synchronous** *XMLHttpRequest*, cache them into Functions using "new Function(xmlhttp.responseText)" and executes them;
 
-* **Q: eval? Are you fucking crazy? What about security?**
+* **Q: "new Function()" with a string? that's eval disguised! Are you fucking crazy? What about security?**
 
-A: executejs is not about protecting corporative data that could harness the world peace if leaked. It is about the most simple way to execute files without using script tags. It could be very usefull for games, for example, but it should not by large corporations where security is essential.
+A: executejs is not about protecting corporative data that could harness the world peace if leaked. It is about the most simple way to execute files without using script tags. It could be usefull for games, for example, but it should not by large corporations where security is essential.
 
 * **Q: But... JQuery already has this functionality, it is the *getScript* function, wich takes a string with the script path, executes it in the global context, and can even execute a callback uppon finishing the execution.**
 
-A: That's right, JQuery already has this functionality. But if you don't need to use jquery (maybe because you are working only with canvas) it wouldn't be wise to use a 10300 lines of code long library just to get a functionality you could get with less than 50 lines of code.
+A: That's right, JQuery already has this functionality. But if you don't need/want to use jquery (maybe because you are working only with canvas) it wouldn't be necessary to use a 10300 lines of code long library just to get a functionality you could get with a few lines.
 
 * **Q: Can I load cross domain scripts?**
 
-A: No. the browsers' same domain policies prevent cross domain scripts to be loaded by xmlhttprequest, and that is great because it is secure =). But you can load cross domain scripts inside the code adding programmatically another script tag with the src attribute referencing the desired cross domain script, something like this:
+A: No. The browsers' same domain policies prevent cross domain scripts from being loaded by XMLHttpRequest, and that is great because it is secure =). It makes it hard to inject code into your own code that will redirect to code hosted in another domain. But you can load cross domain scripts inside the code adding programmatically another script tag with the src attribute referencing the desired cross domain script, something like this:
 ```javascript
 var script = document.createElement('script');
 script.src = "http://my.cross.domain/script.js";
@@ -133,22 +133,22 @@ script.onload = function () {
     //use script
 };
 ```
-* **Q: But why not include several script tags instead of using eval over an XMLHttpRequest.responseText? Evalling an XMLHttpRequest.responseText prevents debugging AT ALL**
+* **Q: But why not include several script tags instead of using eval or "new Function()" over an XMLHttpRequest.responseText? Evalling an XMLHttpRequest.responseText prevents debugging AT ALL**
 
-A: Indeed, evalling a string prevents debugging **AT ALL**. But without eval, it is impossible to call code **within** code, just call code **between** code. Using eval, you can execute an entire javascript file within another javascript file. But adding script headers on the fly make the browser load the script **just after** it finishes executing the current script. For example, given folowing code:
+A: Indeed, evalling a string prevents debugging **AT ALL** (although firefox shows the error lines **inside** the evalled files if you do not use try-catches while evalling the string). But without eval, it is impossible to call code **within** code, just call code **between** code. Using eval, you can execute an entire javascript file within another javascript file, between two lines of your code for example. But adding script headers on the fly make the browser load the script **just after** it finishes executing the current script. For example, given folowing code:
 ```javascript
 doSomething( );
 executejs.execute("myfile.js");
 doSomeOtherThing( );
 ```
-the content of `"myfile.js"` will be executed exactly after doSomething( ) and exactly before doSomeOtherThing( ). Instead, if we had the folowing:
+the content of `"myfile.js"` will be executed entirely exactly after `doSomething()` and exactly before `doSomeOtherThing()`. Instead, if we had the folowing:
 ```javascript
 doSomething( );
-addAScriptTagToTheHtmlHeader("myfile.js");
+addAScriptTagToHtmlHeader("myfile.js");
 doSomeOtherThing( );
 ```
-the `addAScriptTagToTheHtmlHeader()` would add another script tag, but this another script tag would be executed only after completing the execution of the entire file where `addAScriptTagToTheHtmlHeader()` is called, wich is after `doSomeOtherThing()` and after every other statement in the file. Normaly, when you use includes/imports/usings/requires, you expect the required code to be available/executed right after the completion of the include/import/using/require call.
+the `addAScriptTagToHtmlHeader()` would add another script tag, but this another script tag would be executed **only after completing the execution of the entire file where `addAScriptTagToTheHtmlHeader()` is called**, wich is after `doSomeOtherThing()` and after every other statement in the file. Normaly, when you use includes/imports/usings/requires, you expect the required code to be available/executed right after the completion of the include/import/using/require call.
 
 * **Q: Why you named it executejs?**
 
-A: Because it reflects well the targeted functionality, to execute scripts. I wanted to use the name requirejs because thats the php's require and require_once methods what I wanted to mimic. But requirejs was already taken by a much bigger and well known project =(. I considered something like includejs, importjs and usingjs, but includejs was already taken, as so was importjs and usingjs. In fact, even executejs was already taken =O right here on github. But as the project's goal was something pretty different from my executejs, I thougth it would no be a big conflict name problem.
+A: Because it reflects well the targeted functionality, to execute scripts. I wanted to use the name requirejs because thats the php's require and require_once methods what I wanted to mimic. But requirejs was already taken by a much bigger and well known project =(. I considered something like includejs, importjs and usingjs, but includejs was already taken, as so was importjs and usingjs. In fact, even executejs was already taken =O right here on github. But as the project's goal was something pretty different from my executejs, I thougth it would not be a big name conflict problem.
