@@ -16,20 +16,6 @@
 	 * May the global namespace object "executejs" already exists, does nothing
 	 */
 	if (typeof window.executejs === "undefined") {
-
-		/**
-		 * Retrieves only the file name, without the path, from the given file
-		 * path
-		 */
-		var getFileName = function(path) {
-			if (path) {//if not null or undefined
-				path = path.substring(path.lastIndexOf("/") + 1);//gets the file name;
-			} else {
-				path = "";
-			}
-			return path;
-		};
-
 		/**
 		 * Retrieves only the path, without the file name, from the given file
 		 * path
