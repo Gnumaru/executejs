@@ -1,38 +1,13 @@
-/*
- * ********** execute.js **********
+/*!
+ * execute.js, planning version
+ * https://github.com/Gnumaru/executejs
+ *
+ * Copyright 2014, gnumaru
+ * Released under the MIT license
+ * https://github.com/Gnumaru/executejs/blob/master/LICENSE
  * 
- * The purpose of this library is to implement a minimalistic
- * "include/import/using" functionality in javascript, to prevent using several
- * script tags into a html file. This is NOT suposed to be an asynchronous
- * module loader like requirejs, or a synchronous module dependency resolver and
- * build tool like browserify, it is intended to do at runtime exactly what a
- * php interpreter would do when encountering the require and require_once
- * function calls, or what a C compiler preprocessor would do with a include
- * statement
- * 
- * There is not yet a greatly accepted standard for javascript code modularity
- * handling (I'm not talking about code modules definitions and usage, that is
- * covered by Comonjs and AMD, but code modularity, the way by which code is
- * separated into several files and run, be it preprocessed and bundled into a
- * single file or not). Some people use several build tools like browserify or
- * other tools to parse dependencies and preproces/concatenate files
- * accordingly. Others use libraries like require.js to load different module
- * files at runtime, and others separate their code into several script files
- * and add several <include> tags in the page header.
- * 
- * execute.js is intended to be a minimalistc tool to execute a given in-domain
- * script that contains dependencies for the script which is calling it, or that
- * contais procedures to be executed. Say you have a "Person" class (javascript
- * constructor function) defined into "http://(websiteurl)/js/model/Person.js"
- * and you want to use this class into several other files. Just execute once
- * the file, execute("model/Person.js"), and the class will be defined by the
- * application lifetime. Or say you have a procedure that is schedulled (by
- * whathever means) to be executed continuously every minute. you could just put
- * a require("myAwesomeProcedure.js"); inside your scheduler and that's all
- * 
- * execute.js does not address the scopping (handling conflicts because of using
- * global variables) problem AT ALL because that is something you already would
- * be addressing by yourself when using several <script> tags
+ * Read-me
+ * https://github.com/Gnumaru/executejs/blob/master/README.md
  */
 
 'use strict';
@@ -116,12 +91,13 @@
 				filePath = resolveRelativePaths(filePath);
 			}
 
-			return filePath
+			return filePath;
 		};
 
 		//create the "executejs" namespace object
 		var executejs = {};
 		//"hashmap" containing already executed scripts as functions an its file paths
+		//every executedScriptsCache should be a string representing the full file path, and its value is a Object. This Object contains two properties, one Function cached from the evaluated script, and the cached result from the function execution (the actual module exports object);
 		var executedScriptsCache = {};
 		//stack containing the scripts that have been executed but had not already finished execution. It is necessary to prevent circular loops
 		var executionStack = [];
@@ -174,8 +150,7 @@
 			}
 			var returnValue;
 			if (shouldExecute) {
-				if (typeof executedScriptsCache[filePath] === "undefined") {
-					//if script has already not been executed, retrieve it via xmlhttp and create a new function wit its content.
+				if (typeof executedScriptsCache[filePath] === "undefined") {//if script has already not been executed, retrieve it via xmlhttp and create a new function wit its content.
 					console.log("Retrieving \"" + filePath + "\" through XMLHttpRequest.");
 					xmlhttp.onload = function() {
 						try {
@@ -186,11 +161,13 @@
 							//call the function setting "window" to "this" so every global defined there would still be defined as global.
 							returnValue = func.call(window);
 							executionStack.pop();
-							executedScriptsCache[filePath] = func;
+							executedScriptsCache[filePath] = {
+								functionCache : func,
+								resultCache : returnValue
+							};
 						} catch (err) {
 							//the "try catch" catches the evaluation errors but hides the actual line the error ocurred in the evaluated file. if this "try catch" is ommited, firefox console tells an error occured in execute.js, but the line it tells the error ocurred is the line in the actual file whose content was evalled (the one retrieved by XMLHttpRequest). Chrome behaves differently =(
-							var errorMessage = "Error trying to execute \"" + filePath + "\".\r\nJavascript engine's error message:\r\n==========\r\n" + err
-									+ "\r\n==========\r\n";
+							var errorMessage = "Error trying to execute \"" + filePath + "\".\r\nJavascript engine's error message:\r\n==========\r\n" + err + "\r\n==========\r\n";
 							throw new Error(errorMessage);
 						}
 					};
@@ -200,8 +177,7 @@
 					try {
 						xmlhttp.send();
 					} catch (err) {
-						var errorMessage = "Error trying to request \"" + filePath + "\".\r\nJavascript engine's error message:\r\n==========\r\n"
-								+ err.message + "\r\n==========\r\n";
+						var errorMessage = "Error trying to request \"" + filePath + "\".\r\nJavascript engine's error message:\r\n==========\r\n" + err.message + "\r\n==========\r\n";
 						if (err.message.indexOf("Access to restricted URI denied") !== -1) {
 							errorMessage += "Probably the referenced script is mispelled or doesn't exist.";
 						}
@@ -210,7 +186,7 @@
 				} else {
 					//else, execute the function already stored
 					console.log("Executing cache for " + filePath + ".");
-					returnValue = executedScriptsCache[filePath].call(window);
+					returnValue = executedScriptsCache[filePath].resultCache;
 				}
 			}
 			return returnValue;
@@ -237,7 +213,7 @@
 			}
 		};
 
-		//seals the namespace object. It can't be frozen because the "executedScriptsCache" array still needs to be changed over the time
+		//seals the namespace object. It can't be frozen because the "executedScriptsCache" Object still needs to be changed over the time
 		Object.seal(executejs);
 		//exposes the "executejs" namespace object through the global window object
 		window.executejs = executejs;
