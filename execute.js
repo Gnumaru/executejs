@@ -222,8 +222,6 @@
 			}
 		}
 
-		//sets the script root folder
-
 		scriptsFullPathRoot = getScriptsFullPathRoot();
 
 		executejs.executeOnce = executeOnce;
@@ -233,12 +231,13 @@
 		Object.seal(executejs);
 		//exposes the "executejs" namespace object through the global window object
 		window.executejs = executejs;
-		//if there is no globa require function defined, create it as a reference to "executejs.executeOnce()"
+		//if there is no global require function defined, create it as a reference to "executejs.executeOnce()"
 		if (typeof window.require === "undefined") {
 			window.require = executejs.executeOnce;
 		}
-		//if an application entry point was defined, run it now!
-		if (entryPoint) {
+
+		/* APPLICATION START */
+		if (entryPoint) {//if an application entry point was defined, run it now!
 			executejs.executeOnce(entryPoint);
 		}
 	}
