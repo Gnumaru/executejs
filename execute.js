@@ -1,13 +1,10 @@
-/*!
- * execute.js, planning version
- * https://github.com/Gnumaru/executejs
- *
- * Copyright 2014, gnumaru
- * Released under the MIT license
+/*
+ * ! execute.js, planning version https://github.com/Gnumaru/executejs
+ * 
+ * Copyright 2014, gnumaru Released under the MIT license
  * https://github.com/Gnumaru/executejs/blob/master/LICENSE
  * 
- * Read-me
- * https://github.com/Gnumaru/executejs/blob/master/README.md
+ * Read-me https://github.com/Gnumaru/executejs/blob/master/README.md
  */
 
 'use strict';
@@ -16,6 +13,21 @@
 	 * May the global namespace object "executejs" already exists, does nothing
 	 */
 	if (typeof window.executejs === "undefined") {
+		/* FUNCTION DEFINITIONS */
+
+		/**
+		 * retrieves the XMLHttpRequest object
+		 */
+		var getXMLHttpRequest = function() {
+			var xmlhttp;
+			if (window.XMLHttpRequest) { // real browsers
+				xmlhttp = new XMLHttpRequest();
+			} else { // IE6
+				xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+			}
+			return xmlhttp;
+		}
+
 		/**
 		 * Retrieves only the path, without the file name, from the given file
 		 * path
@@ -40,10 +52,10 @@
 			}
 
 			var currentPath;
-			if (executionStack.length > 0) {
+			if (executionStack.length > 0) {//the path used to de-relativize is the absolute path for the last script succesfully execute
 				currentPath = getFilePath(executionStack[executionStack.length - 1]);
-			} else {
-				currentPath = scriptsSource;
+			} else {//but if this is the first script, the entry point, then use the scriptsSource path.
+				currentPath = scriptsFullPathRoot;
 			}
 
 			var timeOut = 100;//timeout to prevent bugs that lead to infinite loops
@@ -67,8 +79,15 @@
 			return currentPath + "/" + relativePath;
 		};
 
-		//function to normalize file path, including the .js suffix if omited, removing leading slash if provided
-		//'use strict' does not permit function declarations inside other functions if it is not the first statement of the function, thus it is only possible to put int inside the "if" if it is an attribution to a variable;
+		/**
+		 * function to normalize file path, including the .js suffix if omited,
+		 * removing leading slash if provided
+		 * 
+		 * 'use strict' does not permit function declarations inside other
+		 * functions if it is not the first statement of the function, thus it
+		 * is only possible to put int inside the "if" if it is an attribution
+		 * to a variable;
+		 */
 		var normalizeFilePath = function(filePath) {
 			if (filePath.lastIndexOf(jsFileSuffix) + jsFileSuffix.length !== filePath.length) {
 				filePath += jsFileSuffix;//append '.js' suffix if already not being used
@@ -80,52 +99,11 @@
 			return filePath;
 		};
 
-		//create the "executejs" namespace object
-		var executejs = {};
-		//"hashmap" containing already executed scripts as functions an its file paths
-		//every executedScriptsCache should be a string representing the full file path, and its value is a Object. This Object contains two properties, one Function cached from the evaluated script, and the cached result from the function execution (the actual module exports object);
-		var executedScriptsCache = {};
-		//stack containing the scripts that have been executed but had not already finished execution. It is necessary to prevent circular loops
-		var executionStack = [];
-		var jsFileSuffix = ".js";
-		var moduleHeader = "var exports = {};\r\n";
-		var moduleFooter = ";\r\nreturn exports;";
-		var main;
-		var root;
-		var xmlhttp;
-		if (window.XMLHttpRequest) { // real browsers
-			xmlhttp = new XMLHttpRequest();
-		} else { // IE6
-			xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-		}
-
-		//gets the main script to be executed, if defined
-		var scripts = document.getElementsByTagName("script");
-		for (var i = 0, length = scripts.length; i < length; i++) {
-			if (scripts[i].getAttribute("src") && scripts[i].getAttribute("src").indexOf("execute.js") !== -1) {
-				main = scripts[i].getAttribute("main");
-				root = scripts[i].getAttribute("root");
-				break;
-			}
-		}
-		//sets the script root folder
-		if (root && root !== "") {//if root is not null of undefined and is different from empty string
-			if (root.indexOf("/") === 0) {//if it has a leading slash
-				root = root.substr(1);//remove leading slash
-			}
-			if (root.lastIndexOf("/") === root.length - 1) {//if it has a tralling slash
-				root = root.substring(0, root.length - 1);//remove trailling slash
-			}
-		} else {
-			root = "";
-		}
-		var scriptsSource = window.location.href.substring(0, window.location.href.lastIndexOf("/") + 1) + root;
-
-		/*
+		/**
 		 * The function "execute" always executes synchronously the given
 		 * script, similar to php's "require".
 		 */
-		executejs.execute = function(filePath) {
+		var execute = function(filePath) {
 			filePath = normalizeFilePath(filePath);
 			var shouldExecute = true;
 			for ( var key in executionStack) {
@@ -178,11 +156,11 @@
 			return returnValue;
 		};
 
-		/*
+		/**
 		 * The function "executeOnce" executes the given script just once, even
 		 * if called multiple times, similar to php's "require_once".
 		 */
-		executejs.executeOnce = function(filePath) {
+		var executeOnce = function(filePath) {
 			filePath = normalizeFilePath(filePath);
 			var shouldExecute = true;
 			for ( var key in executedScriptsCache) {
@@ -199,6 +177,58 @@
 			}
 		};
 
+		/**
+		 * Return the full url for the scripts root folder (the one where the
+		 * entry point resides)
+		 */
+		var getScriptsFullPathRoot = function() {
+			if (scriptsPathRoot && scriptsPathRoot !== "") {//if root is not null of undefined and is different from empty string
+				if (scriptsPathRoot.indexOf("/") === 0) {//if it has a leading slash
+					scriptsPathRoot = scriptsPathRoot.substr(1);//remove leading slash
+				}
+				if (scriptsPathRoot.lastIndexOf("/") === scriptsPathRoot.length - 1) {//if it has a tralling slash
+					scriptsPathRoot = scriptsPathRoot.substring(0, scriptsPathRoot.length - 1);//remove trailling slash
+				}
+			} else {
+				scriptsPathRoot = "";
+			}
+			return window.location.href.substring(0, window.location.href.lastIndexOf("/") + 1) + scriptsPathRoot;
+		}
+
+		/* INITIALIZATION CODE */
+
+		//create the "executejs" namespace object
+		var executejs = {};
+		//"hashmap" containing already executed scripts as functions an its file paths
+		//every executedScriptsCache should be a string representing the full file path, and its value is a Object. This Object contains two properties, one Function cached from the evaluated script, and the cached result from the function execution (the actual module exports object);
+		var executedScriptsCache = {};
+		//stack containing the scripts that have been executed but had not already finished execution. It is necessary to prevent circular loops
+		var executionStack = [];
+		var jsFileSuffix = ".js";
+		var moduleHeader = "var exports = {};\r\n";
+		var moduleFooter = ";\r\nreturn exports;";
+		var entryPoint;
+		var scriptsPathRoot;
+		var scriptsFullPathRoot;//index.html full url + scriptsPathRoot 
+		var xmlhttp = getXMLHttpRequest();
+
+		//gets the main script to be executed, if defined
+		var scripts = document.getElementsByTagName("script");
+		for (var i = 0, length = scripts.length; i < length; i++) {
+			if (scripts[i].getAttribute("src") && scripts[i].getAttribute("src").indexOf("execute.js") !== -1) {
+				entryPoint = scripts[i].getAttribute("main");
+				scriptsPathRoot = scripts[i].getAttribute("root");
+				break;
+			}
+		}
+
+		//sets the script root folder
+
+		scriptsFullPathRoot = getScriptsFullPathRoot();
+
+		executejs.executeOnce = executeOnce;
+		executejs.execute = execute;
+
 		//seals the namespace object. It can't be frozen because the "executedScriptsCache" Object still needs to be changed over the time
 		Object.seal(executejs);
 		//exposes the "executejs" namespace object through the global window object
@@ -208,8 +238,8 @@
 			window.require = executejs.executeOnce;
 		}
 		//if an application entry point was defined, run it now!
-		if (main) {
-			executejs.executeOnce(main);
+		if (entryPoint) {
+			executejs.executeOnce(entryPoint);
 		}
 	}
 })();
