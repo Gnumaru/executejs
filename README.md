@@ -78,8 +78,6 @@ func();
 
 executejs can not yet handle ciclic dependencies, it will just return undefined if you try to require or execute a file whose evaluation by an previous require has not yet completed.
 
-Additionally, executejs handles only full file paths, not relative paths like "./" and "../"
-
 Folder Structure
 =========
 
@@ -130,8 +128,6 @@ execute("someFolder/otherFolder/justAnotherFile.js");
 to execute "justAnotherFile.js" script under "someFolder/otherFolder/".
 
 The root attribute can be specified with or without leading or trailling slashes, like "src", "/src", "src/" or "/src/".
-
-executejs uses only full paths (relative to the root folder), so you cannot use relative paths like './' and '../'.
 
 Known Issues
 =========
