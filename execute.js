@@ -99,6 +99,23 @@
 			return filePath;
 		};
 
+		var getRemoteFileContent = function(filePath) {
+			var responseText = null;
+			console.log("Retrieving \"" + filePath + "\" through XMLHttpRequest.");
+			//forces synchronous script execution with third parameter set to false
+			xmlhttp.open("GET", filePath, false);
+			try {
+				xmlhttp.send();
+			} catch (err) {
+				var errorMessage = "Error trying to request \"" + filePath + "\".\r\nJavascript engine's error message:\r\n==========\r\n" + err.message + "\r\n==========\r\n";
+				if (err.message.indexOf("Access to restricted URI denied") !== -1) {
+					errorMessage += "Probably the referenced script is mispelled or doesn't exist.";
+				}
+				throw new Error(errorMessage);
+			}
+			return responseText;
+		}
+
 		/**
 		 * The function "execute" always executes synchronously the given
 		 * script, similar to php's "require".
@@ -112,6 +129,7 @@
 					console.warn("Prevented execution of " + filePath + " due to previous execution not yet completed.");
 				}
 			}
+
 			var returnValue;
 			if (shouldExecute) {
 				if (typeof executedScriptsCache[filePath] === "undefined") {//if script has already not been executed, retrieve it via xmlhttp and create a new function wit its content.
@@ -124,6 +142,8 @@
 							executionStack.push(filePath);
 							//call the function setting "window" to "this" so every global defined there would still be defined as global.
 							returnValue = func.call(window);
+							//global execution
+//							eval.call(window, xmlhttp.responseText);
 							executionStack.pop();
 							executedScriptsCache[filePath] = {
 								originalScript : xmlhttp.responseText,
@@ -148,8 +168,7 @@
 						}
 						throw new Error(errorMessage);
 					}
-				} else {
-					//else, execute the function already stored
+				} else {//else, returns the cache from the first execution
 					console.log("Executing cache for " + filePath + ".");
 					returnValue = executedScriptsCache[filePath].resultCache;
 				}
