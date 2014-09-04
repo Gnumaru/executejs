@@ -1,8 +1,8 @@
 /*
- * ! execute.js, planning version https://github.com/Gnumaru/executejs
+ * execute.js, planning version https://github.com/Gnumaru/executejs
  * 
- * Copyright 2014, gnumaru Released under the MIT license
- * https://github.com/Gnumaru/executejs/blob/master/LICENSE
+ * Copyright 2014, gnumaru Released under the MIT license (plus the "non evil
+ * use" clause) https://github.com/Gnumaru/executejs/blob/master/LICENSE
  * 
  * Read-me https://github.com/Gnumaru/executejs/blob/master/README.md
  */
