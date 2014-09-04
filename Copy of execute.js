@@ -99,14 +99,13 @@
 			return filePath;
 		};
 
-		var retrieveRemoteFileContent = function(filePath) {
+		var getRemoteFileContent = function(filePath) {
 			var responseText = null;
 			console.log("Retrieving \"" + filePath + "\" through XMLHttpRequest.");
 			//forces synchronous script execution with third parameter set to false
 			xmlhttp.open("GET", filePath, false);
 			try {
 				xmlhttp.send();
-				responseText = xmlhttp.responseText;
 			} catch (err) {
 				var errorMessage = "Error trying to request \"" + filePath + "\".\r\nJavascript engine's error message:\r\n==========\r\n" + err.message + "\r\n==========\r\n";
 				if (err.message.indexOf("Access to restricted URI denied") !== -1) {
@@ -127,32 +126,46 @@
 			for ( var key in executionStack) {
 				if (executionStack[key] === filePath) {
 					shouldExecute = false;
-					console.warn("Prevented execution of " + filePath + " due to the previous execution has not been completed.");
+					console.warn("Prevented execution of " + filePath + " due to previous execution not yet completed.");
 				}
 			}
 
 			var returnValue;
 			if (shouldExecute) {
-				if (typeof executedScriptsCache[filePath] === "undefined") {//if script has already not been executed,
-					var remoteContent = retrieveRemoteFileContent(filePath);//retrieve it via xmlhttp
+				if (typeof executedScriptsCache[filePath] === "undefined") {//if script has already not been executed, retrieve it via xmlhttp and create a new function wit its content.
+					console.log("Retrieving \"" + filePath + "\" through XMLHttpRequest.");
+					xmlhttp.onload = function() {
+						try {
+							//cache the script into a function for later execution
+							var func = new Function(moduleHeader + xmlhttp.responseText + moduleFooter);
+							console.log("Executing " + filePath + ".");
+							executionStack.push(filePath);
+							//call the function setting "window" to "this" so every global defined there would still be defined as global.
+							returnValue = func.call(window);
+							//global execution
+//							eval.call(window, xmlhttp.responseText);
+							executionStack.pop();
+							executedScriptsCache[filePath] = {
+								originalScript : xmlhttp.responseText,
+								functionCache : func,
+								resultCache : returnValue
+							};
+						} catch (err) {
+							//the "try catch" catches the evaluation errors but hides the actual line the error ocurred in the evaluated file. if this "try catch" is ommited, firefox console tells an error occured in execute.js, but the line it tells the error ocurred is the line in the actual file whose content was evalled (the one retrieved by XMLHttpRequest). Chrome behaves differently =(
+							var errorMessage = "Error trying to execute \"" + filePath + "\".\r\nJavascript engine's error message:\r\n==========\r\n" + err + "\r\n==========\r\n";
+							throw new Error(errorMessage);
+						}
+					};
+
+					//forces synchronous script execution with third parameter set to false
+					xmlhttp.open("GET", filePath, false);
 					try {
-						//cache the script into a function for later execution
-						var func = new Function(moduleHeader + remoteContent + moduleFooter);
-						console.log("Executing " + filePath + ".");
-						executionStack.push(filePath);
-						//call the function setting "window" to "this" so every global defined there would still be defined as global.
-						returnValue = func.call(window);
-						//global execution
-						//eval.call(window, remoteContent);
-						executionStack.pop();
-						executedScriptsCache[filePath] = {
-							originalScript : remoteContent,
-							functionCache : func,
-							resultCache : returnValue
-						};
+						xmlhttp.send();
 					} catch (err) {
-						//the "try catch" catches the evaluation errors but hides the actual line the error ocurred in the evaluated file. if this "try catch" is ommited, firefox console tells an error occured in execute.js, but the line it tells the error ocurred is the line in the actual file whose content was evalled (the one retrieved by XMLHttpRequest). Chrome behaves differently =(
-						var errorMessage = "Error trying to execute \"" + filePath + "\".\r\nJavascript engine's error message:\r\n==========\r\n" + err + "\r\n==========\r\n";
+						var errorMessage = "Error trying to request \"" + filePath + "\".\r\nJavascript engine's error message:\r\n==========\r\n" + err.message + "\r\n==========\r\n";
+						if (err.message.indexOf("Access to restricted URI denied") !== -1) {
+							errorMessage += "Probably the referenced script is mispelled or doesn't exist.";
+						}
 						throw new Error(errorMessage);
 					}
 				} else {//else, returns the cache from the first execution
@@ -182,22 +195,6 @@
 			} else {
 				console.warn("Prevented execution of " + filePath + " by executeOnce(). " + filePath + " has already been executed.");
 			}
-		};
-
-		/**
-		 * The function "forceRetrievalAndExecution" executes the given script
-		 * as many times as it is called directly in the global context, without
-		 * taking advantage of any cache and without dealing with the execution
-		 * stack. This is ideal for standalone scripts (those intended to be
-		 * included in the html's head via script tags) whose cache is not
-		 * wanted aniway and/or are proceduraly generated server side, by php or
-		 * other server-side platform
-		 */
-		var forceRetrievalAndExecution = function(filePath) {
-			filePath = normalizeFilePath(filePath);
-			var remoteContent = retrieveRemoteFileContent(filePath);//retrieve script via xmlhttp
-			console.log("Forcing execution of \"" + filePath + "\".");
-			eval.call(window, remoteContent);//execute it in the global context
 		};
 
 		/**
@@ -249,7 +246,6 @@
 
 		executejs.executeOnce = executeOnce;
 		executejs.execute = execute;
-		executejs.forceRetrievalAndExecution = forceRetrievalAndExecution;
 
 		//seals the namespace object. It can't be frozen because the "executedScriptsCache" Object still needs to be changed over the time
 		Object.seal(executejs);
