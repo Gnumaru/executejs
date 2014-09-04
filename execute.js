@@ -250,6 +250,7 @@
 		executejs.executeOnce = executeOnce;
 		executejs.execute = execute;
 		executejs.forceRetrievalAndExecution = forceRetrievalAndExecution;
+		executejs.retrieveRemoteFileContent = retrieveRemoteFileContent;
 
 		//seals the namespace object. It can't be frozen because the "executedScriptsCache" Object still needs to be changed over the time
 		Object.seal(executejs);
