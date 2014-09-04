@@ -126,6 +126,7 @@
 							returnValue = func.call(window);
 							executionStack.pop();
 							executedScriptsCache[filePath] = {
+								originalScript : xmlhttp.responseText,
 								functionCache : func,
 								resultCache : returnValue
 							};
