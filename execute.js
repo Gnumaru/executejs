@@ -98,7 +98,7 @@
 
 			return filePath;
 		};
-
+		
 		var retrieveRemoteFileContent = function(filePath) {
 			var responseText = null;
 			console.log("Retrieving \"" + filePath + "\" through XMLHttpRequest.");
@@ -116,7 +116,7 @@
 			}
 			return responseText;
 		}
-
+		
 		/**
 		 * The function "execute" always executes synchronously the given
 		 * script, similar to php's "require".
@@ -215,7 +215,7 @@
 			} else {
 				scriptsPathRoot = "";
 			}
-			return window.location.href.substring(0, window.location.href.lastIndexOf("/") + 1) + scriptsPathRoot;
+			return window.location.href.substring(0, window.location.href.lastIndexOf("/")) + scriptsPathRoot;
 		}
 
 		/* INITIALIZATION CODE */
