@@ -98,7 +98,7 @@
 
 			return filePath;
 		};
-		
+
 		var retrieveRemoteFileContent = function(filePath) {
 			var responseText = null;
 			console.log("Retrieving \"" + filePath + "\" through XMLHttpRequest.");
@@ -116,7 +116,7 @@
 			}
 			return responseText;
 		}
-		
+
 		/**
 		 * The function "execute" always executes synchronously the given
 		 * script, similar to php's "require".
@@ -169,6 +169,7 @@
 		 */
 		var executeOnce = function(filePath) {
 			filePath = normalizeFilePath(filePath);
+			var returnValue = null;
 			var shouldExecute = true;
 			for ( var key in executedScriptsCache) {
 				//if the executedScriptsCache hashmap contains the key and it is equal to the file path, tell to not execute the script again
@@ -178,10 +179,12 @@
 				}
 			}
 			if (shouldExecute) {
-				return executejs.execute(filePath);
+				returnValue = executejs.execute(filePath);
 			} else {
 				console.warn("Prevented execution of " + filePath + " by executeOnce(). " + filePath + " has already been executed.");
+				returnValue = executedScriptsCache[filePath].resultCache;
 			}
+			return returnValue;
 		};
 
 		/**
@@ -228,7 +231,7 @@
 		//stack containing the scripts that have been executed but had not already finished execution. It is necessary to prevent circular loops
 		var executionStack = [];
 		var jsFileSuffix = ".js";
-		var moduleHeader = "var exports = {};\r\n";
+		var moduleHeader = "var module = {};\r\nvar exports = {};\r\nmodule.exports = exports;\r\n";
 		var moduleFooter = ";\r\nreturn exports;";
 		var entryPoint;
 		var scriptsPathRoot;
