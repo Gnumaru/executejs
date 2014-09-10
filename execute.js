@@ -231,8 +231,8 @@
 		//stack containing the scripts that have been executed but had not already finished execution. It is necessary to prevent circular loops
 		var executionStack = [];
 		var jsFileSuffix = ".js";
-		var moduleHeader = "var module = {};\r\nvar exports = {};\r\nmodule.exports = exports;\r\n";
-		var moduleFooter = ";\r\nreturn exports;";
+		var moduleHeader = "var module = {}; var exports = {}; module.exports = exports;";
+		var moduleFooter = ";\r\nreturn module.exports;";
 		var entryPoint;
 		var scriptsPathRoot;
 		var scriptsFullPathRoot;//index.html full url + scriptsPathRoot 
