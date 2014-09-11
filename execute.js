@@ -98,24 +98,24 @@
 
 			return filePath;
 		};
-		
-		var getModuleCandidates = function(relativePath){
+
+		var getModuleCandidates = function(relativePath) {
 			var lastRelativeIndex = relativePath.lastIndexOf("./");
-			if(lastRelativeIndex !== -1) {//if a relative path does exist
+			if (lastRelativeIndex !== -1) {//if a relative path does exist
 				relativePath = "".substring(lastRelativeIndex + 1);//yes, I DO want to keep the trailing slash
 			}
-			
+
 			if (relativePath.lastIndexOf(jsFileSuffix) + jsFileSuffix.length !== relativePath.length) {
 				relativePath += jsFileSuffix;//append '.js' suffix if already not being used
 			}
-			
+
 			var candidates = [];
-			for(var key in executedScriptsCache){
-				if(key.lastIndexOf(relativePath) + relativePath.length === key.length){
+			for ( var key in executedScriptsCache) {
+				if (key.lastIndexOf(relativePath) + relativePath.length === key.length) {
 					candidates.push(key);
 				}
 			}
-			return(candidates);
+			return (candidates);
 		}
 
 		var retrieveRemoteFileContent = function(filePath) {
@@ -187,10 +187,13 @@
 		 * if called multiple times, similar to php's "require_once".
 		 */
 		var executeOnce = function(filePath) {
-			if(executionStack.length = 0){
+			//in case of the execution stack being empty, such as when a require is made inside a function which is not executed directly by the execution stack, but by user interaction with the UI, then try to find candidates for that script on the cache
+			if (executionStack.length === 0) {
 				var candidates = getModuleCandidates(filePath);
-				if(candidates.length > 0){
+				if (candidates.length === 1) {
 					filePath = candidates[0];
+				} else if (candidates.length > 1) {
+					throw new Error("Could not reliably determine required script");
 				}
 			}
 			filePath = normalizeFilePath(filePath);
