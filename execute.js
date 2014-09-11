@@ -98,6 +98,25 @@
 
 			return filePath;
 		};
+		
+		var getModuleCandidates = function(relativePath){
+			var lastRelativeIndex = relativePath.lastIndexOf("./");
+			if(lastRelativeIndex !== -1) {//if a relative path does exist
+				relativePath = "".substring(lastRelativeIndex + 1);//yes, I DO want to keep the trailing slash
+			}
+			
+			if (relativePath.lastIndexOf(jsFileSuffix) + jsFileSuffix.length !== relativePath.length) {
+				relativePath += jsFileSuffix;//append '.js' suffix if already not being used
+			}
+			
+			var candidates = [];
+			for(var key in executedScriptsCache){
+				if(key.lastIndexOf(relativePath) + relativePath.length === key.length){
+					candidates.push(key);
+				}
+			}
+			return(candidates);
+		}
 
 		var retrieveRemoteFileContent = function(filePath) {
 			var responseText = null;
@@ -168,6 +187,12 @@
 		 * if called multiple times, similar to php's "require_once".
 		 */
 		var executeOnce = function(filePath) {
+			if(executionStack.length = 0){
+				var candidates = getModuleCandidates(filePath);
+				if(candidates.length > 0){
+					filePath = candidates[0];
+				}
+			}
 			filePath = normalizeFilePath(filePath);
 			var returnValue = null;
 			var shouldExecute = true;
