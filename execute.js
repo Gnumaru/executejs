@@ -16,7 +16,9 @@
 		/* FUNCTION DEFINITIONS */
 
 		/**
-		 * retrieves the XMLHttpRequest object
+		 * Retrieves the XMLHttpRequest object.
+		 * 
+		 * @return {Object} The XMLHttpRequest object.
 		 */
 		var getXMLHttpRequest = function() {
 			var xmlhttp;
@@ -30,11 +32,16 @@
 
 		/**
 		 * Retrieves only the path, without the file name, from the given file
-		 * path
+		 * path.
+		 * 
+		 * @param {string}
+		 *            path Path string, probably ending with a file, which
+		 *            containing folder path is trying to be get.
+		 * @return {string} A string containing the path without the file
 		 */
 		var getFilePath = function(path) {
-			if (path) {//if not null or undefined
-				path = path.substring(0, path.lastIndexOf("/"));//gets the file path;
+			if (path) {//if not null or undefined or empty string
+				path = path.substring(0, path.lastIndexOf("/"));//gets the file path, excluding trailling slash
 			} else {
 				path = "";
 			}
@@ -45,6 +52,12 @@
 		 * Given a relativePath, this functions returns its full path based on
 		 * the script execution stack (or the root folder, if it is the first
 		 * script being executed
+		 * 
+		 * @param {string}
+		 *            relativePath Relative javascript file path wich is trying
+		 *            to be derelativized (converted into full path)
+		 * @return {string} The full path corresponding to the relative path
+		 *         given as parameter
 		 */
 		var resolveRelativePaths = function(relativePath) {
 			while (relativePath.indexOf("/") === 0) {//while starts with a leading slash, removes it
@@ -80,13 +93,13 @@
 		};
 
 		/**
-		 * function to normalize file path, including the .js suffix if omited,
-		 * removing leading slash if provided
+		 * Function to normalize file paths, including the .js suffix if omited,
+		 * removing leading slash if provided and resolving relative paths to
+		 * full paths.
 		 * 
-		 * 'use strict' does not permit function declarations inside other
-		 * functions if it is not the first statement of the function, thus it
-		 * is only possible to put int inside the "if" if it is an attribution
-		 * to a variable;
+		 * @param {string}
+		 *            filePath The file path which is trying to be normalized.
+		 * @return {string} The normalized file path.
 		 */
 		var normalizeFilePath = function(filePath) {
 			if (filePath.lastIndexOf(jsFileSuffix) + jsFileSuffix.length !== filePath.length) {
@@ -99,6 +112,16 @@
 			return filePath;
 		};
 
+		/**
+		 * Try to find already loaded modules from the given relative file path
+		 * and return an array with the found candidates full paths.
+		 * 
+		 * @param {string}
+		 *            relativePath Relative path of the module which is trying
+		 *            to be found in the cache.
+		 * @return {string[]} List of module candidate paths (module paths that
+		 *         ends with the given relativePath).
+		 */
 		var getModuleCandidates = function(relativePath) {
 			var lastRelativeIndex = relativePath.lastIndexOf("./");
 			if (lastRelativeIndex !== -1) {//if a relative path does exist
@@ -118,6 +141,14 @@
 			return (candidates);
 		}
 
+		/**
+		 * Retrieves synchronously the content of a file in the given URI.
+		 * 
+		 * @param {string}
+		 *            filePath The full URI of the file whose content is trying
+		 *            to be retrieved.
+		 * @return {string} The string content of the retrieved file.
+		 */
 		var retrieveRemoteFileContent = function(filePath) {
 			var responseText = null;
 			console.log("Retrieving \"" + filePath + "\" through XMLHttpRequest.");
@@ -139,6 +170,13 @@
 		/**
 		 * The function "execute" always executes synchronously the given
 		 * script, similar to php's "require".
+		 * 
+		 * @param {string}
+		 *            filePath The file path of the script trying to be
+		 *            executed.
+		 * @return {object<*, *>} The module.exports object of the executed
+		 *         script. It the executed script does not exports any commonjs
+		 *         module, the return value will be an empty object.
 		 */
 		var execute = function(filePath) {
 			filePath = normalizeFilePath(filePath);
@@ -185,6 +223,12 @@
 		/**
 		 * The function "executeOnce" executes the given script just once, even
 		 * if called multiple times, similar to php's "require_once".
+		 * 
+		 * @parameter {string} filePath The URI of the script which is trying to
+		 *            be executed.
+		 * @return {object<*.*>} The exported commonjs module.exports of that
+		 *         module. If the script does not exports any commonjs modules,
+		 *         the return value will be an empty object.
 		 */
 		var executeOnce = function(filePath) {
 			//in case of the execution stack being empty, such as when a require is made inside a function which is not executed directly by the execution stack, but by user interaction with the UI, then try to find candidates for that script on the cache
@@ -223,6 +267,9 @@
 		 * included in the html's head via script tags) whose cache is not
 		 * wanted aniway and/or are proceduraly generated server side, by php or
 		 * other server-side platform
+		 * 
+		 * @parameter {string} filePath The absolute file URI of the script
+		 *            which is trying to be executed.
 		 */
 		var forceRetrievalAndExecution = function(filePath) {
 			filePath = normalizeFilePath(filePath);
@@ -232,8 +279,10 @@
 		};
 
 		/**
-		 * Return the full url for the scripts root folder (the one where the
+		 * Return the full URI for the scripts root folder (the one where the
 		 * entry point resides)
+		 * 
+		 * @return {string} The scripts root folder URI.
 		 */
 		var getScriptsFullPathRoot = function() {
 			if (scriptsPathRoot && scriptsPathRoot !== "") {//if root is not null of undefined and is different from empty string
@@ -263,7 +312,7 @@
 		var moduleFooter = ";\r\nreturn module.exports;";
 		var entryPoint;
 		var scriptsPathRoot;
-		var scriptsFullPathRoot;//index.html full url + scriptsPathRoot 
+		var scriptsFullPathRoot;//index.html full URI + scriptsPathRoot 
 		var xmlhttp = getXMLHttpRequest();
 
 		//gets the main script to be executed, if defined
