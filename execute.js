@@ -125,7 +125,7 @@
 		var getModuleCandidates = function(relativePath) {
 			var lastRelativeIndex = relativePath.lastIndexOf("./");
 			if (lastRelativeIndex !== -1) {//if a relative path does exist
-				relativePath = "".substring(lastRelativeIndex + 1);//yes, I DO want to keep the trailing slash
+				relativePath = relativePath.substring(lastRelativeIndex + 1);//yes, I DO want to keep the trailing slash
 			}
 
 			if (relativePath.lastIndexOf(jsFileSuffix) + jsFileSuffix.length !== relativePath.length) {
