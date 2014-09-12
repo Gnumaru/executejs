@@ -142,6 +142,28 @@
 		}
 
 		/**
+		 * Converts a given path string with a parent chain to a pseudo-full
+		 * path string (a path starting from the root provided to executejs,
+		 * instead of a path starting with file:// or http://)
+		 * 
+		 * @param {string}
+		 *            pathWithParentChain path suposed to having a parent chain,
+		 *            like in "../../../js/model/entity/person.js" instead of
+		 *            "./entity.js"
+		 * @return {string} the path converted to a pseudo-full path (a path
+		 *         starting from the root provided to executejs, instead of a
+		 *         path starting with file:// or http://)
+		 */
+		var resolveParentChainLeadingToRoot = function(pathWithParentChain) {
+			var lastRelativeIndex = pathWithParentChain.lastIndexOf("../");
+			if (lastRelativeIndex !== -1) {//if there is a parent relation
+				pathWithParentChain = pathWithParentChain.substring(lastRelativeIndex + 3);//yes, I DO want to keep the trailing slash
+			}
+			pathWithParentChain = scriptsPathRoot + "/" + pathWithParentChain;
+			return pathWithParentChain
+		}
+
+		/**
 		 * Retrieves synchronously the content of a file in the given URI.
 		 * 
 		 * @param {string}
@@ -234,10 +256,12 @@
 			//in case of the execution stack being empty, such as when a require is made inside a function which is not executed directly by the execution stack, but by user interaction with the UI, then try to find candidates for that script on the cache
 			if (executionStack.length === 0) {
 				var candidates = getModuleCandidates(filePath);
-				if (candidates.length === 1) {
+				if (candidates.length === 1) {//if only one candidate was found, use it
 					filePath = candidates[0];
-				} else if (candidates.length > 1) {
+				} else if (candidates.length > 1) {//if more than one candidate was found, it is not possible to determine the script
 					throw new Error("Could not reliably determine required script");
+				} else {//if there where any candidates, as a last resort, try assuming the path as a rootyfied relative path
+					filePath = resolveParentChainLeadingToRoot(filePath);
 				}
 			}
 			filePath = normalizeFilePath(filePath);
