@@ -299,7 +299,7 @@
 			filePath = normalizeFilePath(filePath);
 			var remoteContent = retrieveRemoteFileContent(filePath);//retrieve script via xmlhttp
 			console.log("Forcing execution of \"" + filePath + "\".");
-			eval.call(window, remoteContent);//execute it in the global context
+			(new Function(remoteContent))();//execute it in the global context
 		};
 
 		/**
