@@ -221,8 +221,6 @@
 						executionStack.push(filePath);
 						//call the function setting "window" to "this" so every global defined there would still be defined as global.
 						returnValue = func.call(window);
-						//global execution
-						//eval.call(window, remoteContent);
 						executionStack.pop();
 						executedScriptsCache[filePath] = {
 							originalScript : remoteContent,
